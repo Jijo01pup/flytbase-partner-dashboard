@@ -37,7 +37,7 @@ UPDATE partners SET
   tier = '...',
   market_approach = '...',
   website = '...',
-  arr = 0,
+  revenue = 0,
   docks = 0,
   pipeline_value = 0,
   activation = '...',

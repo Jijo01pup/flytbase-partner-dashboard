@@ -85,6 +85,20 @@ What makes this partner distinctive.
 | Key differentiators | `key_differentiators` (array) |
 | Partner voice | `partner_voice` |
 
+**Key differentiators — what qualifies:**
+A differentiator is something that makes this partner genuinely unlike other FlytBase partners. It must be specific and evidenced. Ask: "Could any other partner say this?" If yes, it is not a differentiator.
+
+- YES: "Only FlytBase partner operating 19+ simultaneous live docks across a single Fortune 500 client network"
+- YES: "Holds EU cross-border LUC enabling 3-day site activation vs. 12-16 months locally"
+- YES: "Fortune 500 O&G client (Petronas Gas Berhad) as a live paying customer"
+- NO: "Government reach" — too vague, many partners pitch government
+- NO: "Multi-country presence" — many partners operate across borders
+- NO: "Co-hosted an event with FlytBase" — an activity, not a differentiator
+- NO: "Actively pitching Verkos" — an activity, not a differentiator
+- NO: Proof points (deployed X docks, Y flights) belong in Block 4 Proof, not here
+
+If no clear differentiator is evidenced in the data, write `NULL` — do not invent one.
+
 ---
 
 ### Block 3 · Commercial
@@ -92,7 +106,7 @@ Revenue and pipeline.
 
 | Field | Supabase column | Notes |
 |---|---|---|
-| ARR | `arr` | Numeric only. This is the partner's own FlytBase subscription ARR — not customer revenue. |
+| Revenue | `revenue` | Total closed FlytBase revenue through this partner: sum of all customer subscription ARR + closed on-prem project payments (from Argus closed_won). Excludes SPP/VAR partnership fees. |
 | Docks | `docks` | Number of live docking stations |
 | Pipeline value | `pipeline_value` | Sum of open pipeline deal values |
 | Pipeline deals | `pipeline_deals` | JSONB array — see format below |

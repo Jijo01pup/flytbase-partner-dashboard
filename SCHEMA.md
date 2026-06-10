@@ -38,7 +38,7 @@ RLS is enabled. Anon key = SELECT only. Service role key = full access.
 ### Block 3 — Commercial
 | Column | Type | Default | Description |
 |---|---|---|---|
-| `arr` | NUMERIC | 0 | Partner's own FlytBase subscription ARR |
+| `revenue` | NUMERIC | 0 | Total closed FlytBase revenue through this partner — customer subscriptions + on-prem project payments. Excludes SPP/VAR partnership fees. |
 | `docks` | INTEGER | 0 | Number of live docking stations |
 | `pipeline_value` | NUMERIC | 0 | Total open pipeline value |
 | `pipeline_deals` | JSONB | [] | Array of deal objects — see ENRICHMENT-SPEC.md |
