@@ -103,6 +103,77 @@ body {
 .stat-val.blue   { color: var(--info); }
 .stat-val.amber  { color: var(--warning); }
 
+/* ── VIEW TABS ── */
+.view-tabs {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; gap: 0;
+}
+.view-tab {
+  padding: 10px 18px; font-family: 'Geist Mono', monospace; font-size: 11px;
+  font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--secondary); cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: color 200ms var(--ease), border-color 200ms var(--ease);
+}
+.view-tab:hover { color: var(--text); }
+.view-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* ── AUDIT LOG ── */
+.audit-wrap { padding: 16px 24px; }
+.audit-filterbar {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.audit-filterbar label {
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--secondary);
+}
+.audit-filterbar input[type="date"], .audit-filterbar select {
+  padding: 5px 10px; border: 1px solid var(--border); background: var(--surface);
+  font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--text);
+  outline: none; cursor: pointer; transition: border-color 200ms var(--ease);
+}
+.audit-filterbar input[type="date"]:focus,
+.audit-filterbar select:focus { border-color: var(--orange); }
+.audit-apply-btn {
+  padding: 5px 14px; background: var(--orange); color: white; border: none;
+  font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+  transition: background 200ms var(--ease);
+}
+.audit-apply-btn:hover { background: var(--orange-hover); }
+
+.audit-table-wrap { overflow-x: auto; }
+.audit-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  background: var(--surface); border: 1px solid var(--border);
+}
+.audit-table th {
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--secondary);
+  padding: 10px 14px; text-align: left; background: var(--bg);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.audit-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.audit-table tr:last-child td { border-bottom: none; }
+.audit-table tr:hover td { background: var(--bg); }
+.audit-partner { font-weight: 600; color: var(--text); }
+.audit-source {
+  display: inline-block; padding: 2px 7px; border-radius: 3px;
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.src-daily { background: var(--info-bg); color: var(--info); }
+.src-weekly { background: var(--success-bg); color: var(--success); }
+.src-manual { background: var(--warning-bg); color: var(--warning); }
+.src-system { background: var(--tag-bg); color: var(--secondary); }
+.audit-changes { font-size: 12px; color: var(--secondary); line-height: 1.6; }
+.audit-change-item { margin-bottom: 3px; }
+.audit-change-item .field { font-weight: 600; color: var(--text); }
+.audit-change-item .arrow { color: var(--secondary); }
+.audit-change-item .new-val { color: var(--success); }
+.audit-date { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--secondary); white-space: nowrap; }
+.audit-summary { color: var(--text); }
+.audit-count { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--secondary); margin-bottom: 10px; }
+
 /* ── FILTER BAR ── */
 .filter-bar {
   padding: 8px 24px; background: var(--bg); border-bottom: 1px solid var(--border);
@@ -411,6 +482,12 @@ a:hover { text-decoration: underline; }
   <div class="stat"><div class="stat-val" id="s-investigate">—</div><div class="stat-label">Investigate</div></div>
 </div>
 
+<!-- VIEW TABS -->
+<div class="view-tabs">
+  <div class="view-tab active" id="tab-partners" onclick="switchView('partners')">Partners</div>
+  <div class="view-tab" id="tab-audit" onclick="switchView('audit')">Audit Log</div>
+</div>
+
 <!-- FILTER BAR -->
 <div class="filter-bar">
   <span class="filter-label">Region</span>
@@ -441,8 +518,37 @@ a:hover { text-decoration: underline; }
   <button class="filter-clear" id="clearFiltersBtn" onclick="clearFilters()">Clear filters</button>
 </div>
 
+<!-- AUDIT LOG VIEW -->
+<div id="auditView" style="display:none">
+  <div class="audit-wrap">
+    <div class="audit-filterbar">
+      <label>From</label>
+      <input type="date" id="auditFrom" />
+      <label>To</label>
+      <input type="date" id="auditTo" />
+      <label>Source</label>
+      <select id="auditSource">
+        <option value="">All</option>
+        <option value="daily_sweep">Daily Sweep</option>
+        <option value="weekly_sync">Weekly Sync</option>
+        <option value="manual">Manual</option>
+      </select>
+      <label>Partner</label>
+      <input type="text" id="auditPartner" placeholder="Any partner…"
+        style="padding:5px 10px;border:1px solid var(--border);font-family:'Geist',sans-serif;font-size:13px;outline:none;width:180px" />
+      <button class="audit-apply-btn" onclick="loadAuditLog()">Apply</button>
+    </div>
+    <div class="audit-count" id="auditCount"></div>
+    <div class="audit-table-wrap">
+      <div id="auditTableWrap">
+        <div class="loading-state"><div class="spinner"></div><div>Loading audit log…</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MAIN -->
-<div class="main">
+<div class="main" id="partnersView">
   <div class="results-info" id="resultsInfo"></div>
   <div id="gridWrap">
     <div class="loading-state" id="initialState">
@@ -965,6 +1071,111 @@ function renderPanelBody(p) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closePanel();
 });
+
+// ── VIEW SWITCHING ────────────────────────────────────────────────────────
+let currentView = 'partners';
+function switchView(view) {
+  currentView = view;
+  document.getElementById('partnersView').style.display = view === 'partners' ? '' : 'none';
+  document.getElementById('auditView').style.display   = view === 'audit'    ? '' : 'none';
+  document.querySelector('.filter-bar').style.display  = view === 'partners' ? '' : 'none';
+  document.getElementById('tab-partners').classList.toggle('active', view === 'partners');
+  document.getElementById('tab-audit').classList.toggle('active', view === 'audit');
+  if (view === 'audit') loadAuditLog();
+}
+
+// ── AUDIT LOG ─────────────────────────────────────────────────────────────
+async function loadAuditLog() {
+  document.getElementById('auditTableWrap').innerHTML =
+    '<div class="loading-state"><div class="spinner"></div><div>Loading…</div></div>';
+
+  const from    = document.getElementById('auditFrom').value;
+  const to      = document.getElementById('auditTo').value;
+  const source  = document.getElementById('auditSource').value;
+  const partner = document.getElementById('auditPartner').value.trim();
+
+  let url = `${SUPABASE_URL}/rest/v1/partner_audit_log?select=*&order=changed_at.desc&limit=200`;
+  if (from)    url += `&changed_at=gte.${from}T00:00:00`;
+  if (to)      url += `&changed_at=lte.${to}T23:59:59`;
+  if (source)  url += `&source=eq.${encodeURIComponent(source)}`;
+  if (partner) url += `&partner_name=ilike.*${encodeURIComponent(partner)}*`;
+
+  try {
+    const r = await fetch(url, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const rows = await r.json();
+    renderAuditLog(rows);
+  } catch(e) {
+    document.getElementById('auditTableWrap').innerHTML =
+      `<div class="empty-state"><div class="empty-title">Could not load audit log</div><div class="empty-sub">${e.message}</div></div>`;
+  }
+}
+
+function renderAuditLog(rows) {
+  document.getElementById('auditCount').textContent =
+    rows.length ? `${rows.length} entr${rows.length === 1 ? 'y' : 'ies'}` : '';
+
+  if (!rows.length) {
+    document.getElementById('auditTableWrap').innerHTML =
+      '<div class="empty-state"><div class="empty-title">No audit entries found</div><div class="empty-sub">Changes made by scheduled tasks and manual updates will appear here.</div></div>';
+    return;
+  }
+
+  const srcClass = s => ({
+    daily_sweep: 'src-daily', weekly_sync: 'src-weekly',
+    manual: 'src-manual'
+  }[s] || 'src-system');
+
+  const srcLabel = s => ({
+    daily_sweep: 'Daily', weekly_sync: 'Weekly', manual: 'Manual'
+  }[s] || s || 'System');
+
+  const fmtDate = d => {
+    if (!d) return '—';
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' })
+      + ' ' + dt.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+  };
+
+  const renderChanges = changes => {
+    if (!changes) return '—';
+    let arr = [];
+    try { arr = Array.isArray(changes) ? changes : JSON.parse(changes); } catch { return String(changes); }
+    if (!arr.length) return '—';
+    return arr.map(c => `
+      <div class="audit-change-item">
+        <span class="field">${c.field || ''}</span>
+        ${c.old_value !== undefined ? `<span class="arrow"> → </span><span class="new-val">${c.new_value ?? ''}</span>` : ''}
+      </div>`).join('');
+  };
+
+  const html = `
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Date / Time</th>
+          <th>Partner</th>
+          <th>Source</th>
+          <th>Summary</th>
+          <th>Changes</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr>
+            <td class="audit-date">${fmtDate(r.changed_at)}</td>
+            <td class="audit-partner">${r.partner_name}</td>
+            <td><span class="audit-source ${srcClass(r.source)}">${srcLabel(r.source)}</span></td>
+            <td class="audit-summary">${r.summary || '—'}</td>
+            <td class="audit-changes">${renderChanges(r.changes)}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  document.getElementById('auditTableWrap').innerHTML = html;
+}
 
 // ── AUTO-LOAD ─────────────────────────────────────────────────────────────
 loadFromSupabase();
