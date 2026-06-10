@@ -743,6 +743,7 @@ function renderGrid() {
             <div class="card-num-label">Revenue</div>
           </div>
           ${docks ? `<div class="card-num"><div class="card-num-val">${docks}</div><div class="card-num-label">Docks</div></div>` : ''}
+          ${p.pipeline_value ? `<div class="card-num"><div class="card-num-val">${fmtUSD(Number(p.pipeline_value))}</div><div class="card-num-label">Pipeline</div></div>` : ''}
         </div>
         ${verts.length ? `<div class="card-verticals">${verts.map(v=>`<span class="vert-chip">${v}</span>`).join('')}</div>` : ''}
         <div class="card-footer">
