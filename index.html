@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlytBase · Partner Intelligence</title>
+<style>
+:root {
+  --orange: #e8622a;
+  --orange-light: #fff4ee;
+  --orange-border: #fdd5bb;
+  --bg: #f4f4f5;
+  --card: #ffffff;
+  --border: #e4e4e7;
+  --label: #71717a;
+  --text: #18181b;
+  --tag-bg: #f1f1f1;
+  font-size: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+/* ── HEADER ── */
+.header {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; align-items: center; gap: 16px;
+  height: 56px; position: sticky; top: 0; z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; text-decoration: none; }
+.logo-bar { width: 3px; height: 20px; background: var(--orange); border-radius: 2px; }
+.logo-text { font-size: 13px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--orange); }
+.logo-sub { font-size: 12px; color: var(--label); font-weight: 400; margin-left: 4px; letter-spacing: 0; text-transform: none; }
+.header-right { display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; }
+.search-wrap { position: relative; }
+.search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--label); pointer-events: none; }
+#searchInput {
+  padding: 7px 12px 7px 32px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; width: 240px; outline: none; background: var(--bg); transition: border-color 0.15s;
+}
+#searchInput:focus { border-color: var(--orange); background: #fff; }
+.config-btn {
+  padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 12px; font-weight: 600; color: var(--label); cursor: pointer;
+  background: #fff; letter-spacing: 0.04em; display: flex; align-items: center; gap: 5px;
+}
+.config-btn:hover { border-color: var(--orange); color: var(--orange); }
+.last-updated { font-size: 11px; color: var(--label); white-space: nowrap; }
+
+/* ── STATS BAR ── */
+.stats-bar {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 0 24px; display: flex; align-items: stretch; gap: 0;
+  overflow-x: auto;
+}
+.stat {
+  padding: 12px 20px; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 2px; flex-shrink: 0;
+}
+.stat:first-child { padding-left: 0; }
+.stat-val { font-size: 20px; font-weight: 700; color: var(--text); }
+.stat-label { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--label); }
+.stat-val.orange { color: var(--orange); }
+.stat-val.green { color: #16a34a; }
+.stat-val.blue { color: #2563eb; }
+.stat-val.amber { color: #d97706; }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  padding: 10px 24px; background: var(--bg); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.filter-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--label); margin-right: 4px; }
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  cursor: pointer; border: 1px solid transparent; transition: all 0.12s;
+  background: var(--card); border-color: var(--border); color: var(--label);
+  letter-spacing: 0.04em;
+}
+.chip:hover { border-color: var(--orange); color: var(--orange); }
+.chip.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+.filter-sep { width: 1px; background: var(--border); margin: 0 6px; align-self: stretch; }
+
+/* ── MAIN GRID ── */
+.main { padding: 16px 24px; }
+.results-info { font-size: 12px; color: var(--label); margin-bottom: 12px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+/* ── PARTNER CARD ── */
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: #d4d4d8; }
+.card.selected { border-color: var(--orange); box-shadow: 0 0 0 2px var(--orange-light); }
+
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.card-name { font-weight: 700; font-size: 14px; line-height: 1.3; }
+.card-tier { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px; flex-shrink: 0; margin-left: 6px; margin-top: 2px; }
+.tier-t1 { background: #fef3c7; color: #92400e; }
+.tier-t2 { background: #f0fdf4; color: #15803d; }
+.tier-t3 { background: #eff6ff; color: #1d4ed8; }
+.tier-unassigned { background: var(--tag-bg); color: var(--label); }
+
+.card-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.meta-tag { font-size: 10px; color: var(--label); display: flex; align-items: center; gap: 3px; }
+.meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--border); }
+
+.card-numbers { display: flex; gap: 14px; }
+.card-num { display: flex; flex-direction: column; gap: 1px; }
+.card-num-val { font-size: 15px; font-weight: 700; color: var(--text); }
+.card-num-label { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--label); }
+
+.card-verticals { display: flex; flex-wrap: wrap; gap: 4px; }
+.vert-chip {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; background: var(--orange-light); color: var(--orange);
+}
+
+.card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+.card-contact { font-size: 11px; color: var(--label); }
+.act-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 20px;
+}
+.act-investigate { background: #f4f4f5; color: #71717a; }
+.act-onboard { background: #eff6ff; color: #2563eb; }
+.act-activate { background: #fffbeb; color: #d97706; }
+.act-grow { background: #f0fdf4; color: #16a34a; }
+.act-unknown { background: #f4f4f5; color: #a1a1aa; }
+
+.card-not-enriched { opacity: 0.6; }
+.not-enriched-label {
+  font-size: 10px; color: var(--label); font-style: italic;
+  padding: 2px 0; text-align: center; border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 8px;
+}
+
+/* ── DETAIL PANEL ── */
+.panel-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.25);
+  z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.panel-overlay.open { opacity: 1; pointer-events: all; }
+
+.panel {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 620px; max-width: 95vw;
+  background: #fff; z-index: 201; overflow-y: auto;
+  transform: translateX(100%); transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -4px 0 32px rgba(0,0,0,0.12);
+}
+.panel.open { transform: translateX(0); }
+
+.panel-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.panel-title { font-weight: 700; font-size: 18px; }
+.panel-close {
+  width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border);
+  background: #fff; cursor: pointer; font-size: 16px; display: flex; align-items: center;
+  justify-content: center; color: var(--label); transition: all 0.12s;
+}
+.panel-close:hover { border-color: var(--orange); color: var(--orange); }
+
+.panel-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.pblock { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.pblock-header {
+  padding: 8px 14px; border-bottom: 1px solid var(--border);
+  background: var(--bg); display: flex; align-items: center; gap: 8px;
+}
+.pblock-dot { width: 3px; height: 13px; background: var(--orange); border-radius: 2px; }
+.pblock-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--label); }
+.pblock-body { padding: 14px; }
+
+.prow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+.prow-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+.prow:last-child, .prow-3:last-child { margin-bottom: 0; }
+.pfield { }
+.pfield-label { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--label); margin-bottom: 3px; }
+.pfield-val { font-size: 13px; color: var(--text); line-height: 1.5; }
+.pfield-val.big { font-size: 22px; font-weight: 700; }
+.pfield-empty { color: var(--label); font-style: italic; font-size: 12px; }
+.ptags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+.ptag { display: inline-block; padding: 2px 7px; background: var(--tag-bg); border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #3f3f46; }
+.ptag-orange { background: var(--orange-light); color: var(--orange); border: 1px solid var(--orange-border); }
+
+.star-story { padding: 10px 13px; background: var(--orange-light); border-left: 3px solid var(--orange); border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.6; color: #3f2a1a; font-style: italic; margin-bottom: 10px; }
+.partner-voice { padding: 10px 13px; background: #fafafa; border-left: 3px solid #d4d4d8; border-radius: 0 6px 6px 0; font-size: 13px; line-height: 1.6; color: #52525b; font-style: italic; margin-top: 8px; }
+
+.customer-list { display: flex; flex-direction: column; gap: 5px; }
+.customer-row { padding: 8px 10px; background: var(--bg); border-radius: 6px; border-left: 3px solid var(--orange); }
+.customer-row.unverified { border-left-color: #d4d4d8; opacity: 0.75; }
+.customer-name { font-weight: 600; font-size: 13px; }
+.customer-meta { font-size: 11px; color: var(--label); margin-top: 1px; }
+
+.deal-list { display: flex; flex-direction: column; gap: 5px; }
+.deal-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 10px; background: var(--bg); border-radius: 6px; border-left: 3px solid var(--orange); }
+.deal-name { font-weight: 600; font-size: 12px; }
+.deal-ec { font-size: 11px; color: var(--label); }
+.deal-right { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+.deal-val { font-weight: 700; font-size: 13px; color: var(--orange); }
+.deal-stage { font-size: 10px; padding: 2px 6px; background: var(--tag-bg); border-radius: 3px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--label); }
+
+.pnote { padding: 6px 0; font-size: 13px; color: var(--text); line-height: 1.6; }
+.pillar-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.pillar-tag { padding: 4px 9px; background: var(--orange-light); color: var(--orange); border: 1px solid var(--orange-border); border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.section-sub { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--label); margin: 10px 0 6px; }
+.section-sub:first-child { margin-top: 0; }
+.bullet-list { padding-left: 16px; font-size: 13px; line-height: 1.8; }
+
+.panel-enrich-btn {
+  margin: 8px 0 0; padding: 9px 16px; background: var(--orange); color: #fff;
+  border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+  width: 100%; letter-spacing: 0.03em; transition: opacity 0.15s;
+}
+.panel-enrich-btn:hover { opacity: 0.88; }
+
+/* ── SETUP MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 300; display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 10px; padding: 24px; width: 500px; max-width: 95vw; }
+.modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.modal p { font-size: 13px; color: var(--label); margin-bottom: 16px; line-height: 1.6; }
+.modal input {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 13px; outline: none; margin-bottom: 12px;
+}
+.modal input:focus { border-color: var(--orange); }
+.modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.btn-primary { padding: 8px 18px; background: var(--orange); color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-secondary { padding: 8px 18px; background: #fff; color: var(--label); border: 1px solid var(--border); border-radius: 6px; font-size: 13px; cursor: pointer; }
+
+/* ── EMPTY / LOADING ── */
+.loading-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 24px; gap: 14px; color: var(--label);
+}
+.spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border);
+  border-top-color: var(--orange); border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 60px 24px; color: var(--label); }
+.empty-icon { font-size: 40px; opacity: 0.35; margin-bottom: 12px; }
+.empty-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.empty-sub { font-size: 13px; max-width: 320px; margin: 0 auto; line-height: 1.7; }
+
+/* ── UTILS ── */
+a { color: var(--orange); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.pfield-val a { font-size: 13px; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+.two-col-numbers { display: flex; gap: 20px; margin-bottom: 14px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-bar"></div>
+    <div class="logo-text">FlytBase <span class="logo-sub">Partner Intelligence</span></div>
+  </div>
+  <div class="header-right">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search partners…" oninput="applyFilters()">
+    </div>
+    <button class="config-btn" id="refreshBtn" onclick="loadFromSupabase()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Refresh
+    </button>
+    <span class="last-updated" id="lastUpdated"></span>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat"><div class="stat-val" id="s-total">—</div><div class="stat-label">Partners</div></div>
+  <div class="stat"><div class="stat-val orange" id="s-enriched">—</div><div class="stat-label">Enriched</div></div>
+  <div class="stat"><div class="stat-val" id="s-arr">—</div><div class="stat-label">Total ARR</div></div>
+  <div class="stat"><div class="stat-val" id="s-docks">—</div><div class="stat-label">Docks Live</div></div>
+  <div class="stat"><div class="stat-val green" id="s-grow">—</div><div class="stat-label">Grow</div></div>
+  <div class="stat"><div class="stat-val amber" id="s-activate">—</div><div class="stat-label">Activate</div></div>
+  <div class="stat"><div class="stat-val blue" id="s-onboard">—</div><div class="stat-label">Onboard</div></div>
+  <div class="stat"><div class="stat-val" id="s-investigate">—</div><div class="stat-label">Investigate</div></div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <span class="filter-label">Region</span>
+  <div class="filter-chips" id="regionChips"></div>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Tier</span>
+  <div class="filter-chips" id="tierChips"></div>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Activation</span>
+  <div class="filter-chips" id="actChips"></div>
+  <div class="filter-sep"></div>
+  <span class="filter-label">Status</span>
+  <div class="filter-chips" id="statusChips"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="results-info" id="resultsInfo"></div>
+  <div id="gridWrap">
+    <div class="loading-state" id="initialState">
+      <div class="spinner"></div>
+      <div>Loading partners from database…</div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+
+<div class="panel-overlay" id="panelOverlay" onclick="closePanel()"></div>
+<div class="panel" id="detailPanel">
+  <div class="panel-header">
+    <div class="panel-title" id="panelTitle"></div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let ALL_PARTNERS = [];
+let FILTERED = [];
+let activeFilters = { region: 'All', tier: 'All', activation: 'All', status: 'All' };
+let selectedPartner = null;
+
+// ── CSV PARSING ────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVRow(lines[0]).map(h => h.trim().toLowerCase().replace(/\s+/g,'_'));
+  const results = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const values = parseCSVRow(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = (values[idx] || '').trim(); });
+    if (obj.partner_name) results.push(obj);
+  }
+  return results;
+}
+
+function parseCSVRow(row) {
+  const cols = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < row.length; i++) {
+    const c = row[i];
+    if (c === '"') {
+      if (inQ && row[i+1] === '"') { cur += '"'; i++; }
+      else { inQ = !inQ; }
+    } else if (c === ',' && !inQ) {
+      cols.push(cur); cur = '';
+    } else { cur += c; }
+  }
+  cols.push(cur);
+  return cols;
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function fmtUSD(n) {
+  n = Number(n || 0);
+  if (!n) return '$0';
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return '$' + Math.round(n/1000) + 'k';
+  return '$' + n.toLocaleString();
+}
+
+function isEnriched(p) {
+  return !!(p.activation || p.region || p.arr || p.primary_verticals);
+}
+
+function tierBadge(tier) {
+  const t = (tier || '').toLowerCase();
+  if (t.includes('enterprise') || t === 't1' || t.includes('lighthouse')) return 'tier-t1';
+  if (t === 'gold' || t === 't2') return 'tier-t2';
+  if (t === 'bronze' || t === 't3') return 'tier-t3';
+  return 'tier-unassigned';
+}
+
+function tierLabel(tier) {
+  const t = (tier || '').toLowerCase();
+  if (t.includes('enterprise') || t === 't1' || t.includes('lighthouse')) return 'T1';
+  if (t === 'gold' || t === 't2') return 'T2';
+  if (t === 'bronze' || t === 't3') return 'T3';
+  return tier || '—';
+}
+
+function actBadgeClass(a) {
+  const s = (a || '').toLowerCase();
+  if (s.includes('investigate')) return 'act-investigate';
+  if (s.includes('onboard')) return 'act-onboard';
+  if (s.includes('activate')) return 'act-activate';
+  if (s.includes('grow')) return 'act-grow';
+  return 'act-unknown';
+}
+
+function parseList(s) {
+  if (!s) return [];
+  if (Array.isArray(s)) return s.filter(Boolean);
+  try { const a = JSON.parse(s); if (Array.isArray(a)) return a; } catch {}
+  return s.split(';').map(x => x.trim()).filter(Boolean);
+}
+
+function parseCustomers(s) {
+  if (!s) return [];
+  if (Array.isArray(s)) return s.map(c => typeof c === 'string' ? {name:c} : c);
+  try {
+    const a = JSON.parse(s);
+    if (Array.isArray(a)) return a.map(c => typeof c === 'string' ? {name:c} : c);
+  } catch {}
+  return s.split(';').map(x => x.trim()).filter(Boolean).map(n => ({name:n}));
+}
+
+function parseDeals(s) {
+  if (!s) return [];
+  if (Array.isArray(s)) return s;
+  try {
+    const a = JSON.parse(s);
+    if (Array.isArray(a)) return a;
+  } catch {}
+  return [];
+}
+
+function emptyOr(v, fallback = '—') {
+  return v || `<span class="pfield-empty">${fallback}</span>`;
+}
+
+// ── SUPABASE CONFIG ────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://dyehigwvpirujdiksese.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5ZWhpZ3d2cGlydWpkaWtzZXNlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwODAxNTIsImV4cCI6MjA5NjY1NjE1Mn0.yrdF7gAgURzQ12OrnbYFdC4lJ5oBiH29vkxr9tRxIFA';
+
+// ── LOAD DATA ─────────────────────────────────────────────────────────────
+function ingestPartners(data) {
+  ALL_PARTNERS = data;
+  buildFilters();
+  applyFilters();
+  updateStats();
+  document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  document.getElementById('refreshBtn').disabled = false;
+}
+
+async function loadFromSupabase() {
+  document.getElementById('refreshBtn').disabled = true;
+  document.getElementById('gridWrap').innerHTML = `
+    <div class="loading-state"><div class="spinner"></div><div>Loading partners…</div></div>`;
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/partners?select=*&order=partner_name.asc`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    ingestPartners(data);
+  } catch (e) {
+    document.getElementById('gridWrap').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Could not load partners</div>
+        <div class="empty-sub">${e.message}</div>
+      </div>`;
+    document.getElementById('refreshBtn').disabled = false;
+  }
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────
+function buildFilters() {
+  const regions = [...new Set(ALL_PARTNERS.map(p => p.region).filter(Boolean).sort())];
+  const tiers = [...new Set(ALL_PARTNERS.map(p => (p.tier||'Unassigned')).sort())];
+  const acts = ['Investigate','Onboard','Activate','Grow'];
+
+  renderChips('regionChips', ['All', ...regions], 'region');
+  renderChips('tierChips', ['All', ...tiers.map(t => t || 'Unassigned')], 'tier');
+  renderChips('actChips', ['All', ...acts], 'activation');
+  renderChips('statusChips', ['All', 'Enriched', 'Not enriched'], 'status');
+}
+
+function renderChips(containerId, options, filterKey) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = options.map(opt => `
+    <div class="chip ${activeFilters[filterKey] === opt ? 'active' : ''}"
+      onclick="setFilter('${filterKey}','${opt}')">${opt}</div>
+  `).join('');
+}
+
+function setFilter(key, val) {
+  activeFilters[key] = val;
+  buildFilters();
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  FILTERED = ALL_PARTNERS.filter(p => {
+    if (q && !p.partner_name.toLowerCase().includes(q)) return false;
+    if (activeFilters.region !== 'All' && p.region !== activeFilters.region) return false;
+    if (activeFilters.tier !== 'All') {
+      const t = p.tier || 'Unassigned';
+      if (t !== activeFilters.tier) return false;
+    }
+    if (activeFilters.activation !== 'All') {
+      if (!(p.activation || '').toLowerCase().includes(activeFilters.activation.toLowerCase())) return false;
+    }
+    if (activeFilters.status === 'Enriched' && !isEnriched(p)) return false;
+    if (activeFilters.status === 'Not enriched' && isEnriched(p)) return false;
+    return true;
+  });
+  renderGrid();
+  document.getElementById('resultsInfo').textContent =
+    FILTERED.length === ALL_PARTNERS.length
+      ? `${ALL_PARTNERS.length} partners`
+      : `${FILTERED.length} of ${ALL_PARTNERS.length} partners`;
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────
+function updateStats() {
+  const enriched = ALL_PARTNERS.filter(isEnriched);
+  const totalARR = ALL_PARTNERS.reduce((s, p) => s + Number(p.arr || 0), 0);
+  const totalDocks = ALL_PARTNERS.reduce((s, p) => s + Number(p.docks || 0), 0);
+  const counts = {grow:0, activate:0, onboard:0, investigate:0};
+  ALL_PARTNERS.forEach(p => {
+    const a = (p.activation || '').toLowerCase();
+    if (a.includes('grow')) counts.grow++;
+    else if (a.includes('activate')) counts.activate++;
+    else if (a.includes('onboard')) counts.onboard++;
+    else if (a.includes('investigate')) counts.investigate++;
+  });
+  document.getElementById('s-total').textContent = ALL_PARTNERS.length;
+  document.getElementById('s-enriched').textContent = enriched.length;
+  document.getElementById('s-arr').textContent = fmtUSD(totalARR);
+  document.getElementById('s-docks').textContent = totalDocks || '—';
+  document.getElementById('s-grow').textContent = counts.grow;
+  document.getElementById('s-activate').textContent = counts.activate;
+  document.getElementById('s-onboard').textContent = counts.onboard;
+  document.getElementById('s-investigate').textContent = counts.investigate;
+}
+
+// ── GRID ──────────────────────────────────────────────────────────────────
+function renderGrid() {
+  if (!FILTERED.length) {
+    document.getElementById('gridWrap').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No partners match</div>
+        <div class="empty-sub">Try adjusting your filters or search term.</div>
+      </div>`;
+    return;
+  }
+
+  const html = FILTERED.map((p, i) => {
+    const enriched = isEnriched(p);
+    const verts = parseList(p.primary_verticals).slice(0, 2);
+    const arr = Number(p.arr || 0);
+    const docks = Number(p.docks || 0);
+    const tb = tierBadge(p.tier);
+    const tl = tierLabel(p.tier);
+    const ac = actBadgeClass(p.activation);
+    const sel = selectedPartner === p.partner_name ? 'selected' : '';
+
+    return `
+      <div class="card ${!enriched ? 'card-not-enriched' : ''} ${sel}" onclick="openPanel(${i})">
+        <div class="card-top">
+          <div class="card-name">${p.partner_name}</div>
+          ${p.tier ? `<div class="card-tier ${tb}">${tl}</div>` : ''}
+        </div>
+        <div class="card-meta">
+          ${p.region ? `<span class="meta-tag">${p.region}</span>` : ''}
+          ${p.partner_type ? `<><span class="meta-dot"></span><span class="meta-tag">${p.partner_type}</span></>` : ''}
+          ${p.hq ? `<span class="meta-dot"></span><span class="meta-tag">${p.hq}</span>` : ''}
+        </div>
+        ${enriched ? `
+        <div class="card-numbers">
+          <div class="card-num">
+            <div class="card-num-val">${fmtUSD(arr)}</div>
+            <div class="card-num-label">ARR</div>
+          </div>
+          ${docks ? `<div class="card-num"><div class="card-num-val">${docks}</div><div class="card-num-label">Docks</div></div>` : ''}
+        </div>
+        ${verts.length ? `<div class="card-verticals">${verts.map(v=>`<span class="vert-chip">${v}</span>`).join('')}</div>` : ''}
+        <div class="card-footer">
+          <div class="card-contact">${p.key_contact_name ? '👤 '+p.key_contact_name : ''}</div>
+          ${p.activation ? `<div class="act-badge ${ac}">${p.activation}</div>` : ''}
+        </div>` : `
+        <div class="not-enriched-label">Not yet enriched</div>`}
+      </div>`;
+  }).join('');
+
+  document.getElementById('gridWrap').innerHTML = `<div class="grid">${html}</div>`;
+}
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────────────
+function openPanel(idx) {
+  const p = FILTERED[idx];
+  if (!p) return;
+  selectedPartner = p.partner_name;
+  renderGrid();
+
+  document.getElementById('panelTitle').textContent = p.partner_name;
+  document.getElementById('panelBody').innerHTML = renderPanelBody(p);
+  document.getElementById('panelOverlay').classList.add('open');
+  document.getElementById('detailPanel').classList.add('open');
+}
+
+function closePanel() {
+  selectedPartner = null;
+  renderGrid();
+  document.getElementById('panelOverlay').classList.remove('open');
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+function renderPanelBody(p) {
+  const enriched = isEnriched(p);
+  const customers = parseCustomers(p.customers);
+  const deals = parseDeals(p.pipeline_deals);
+  const verts1 = parseList(p.primary_verticals);
+  const verts2 = parseList(p.secondary_verticals);
+  const pillars = parseList(p.pillars_needed);
+  const vertGuides = parseList(p.vertical_guides);
+  const localization = parseList(p.localization);
+  const decks = parseList(p.decks_to_build);
+  const differentiators = parseList(p.key_differentiators);
+  const useCases = parseList(p.proven_use_cases);
+  const geos = parseList(p.proven_geographies);
+  const languages = parseList(p.languages);
+  const addContacts = parseList(p.additional_contacts);
+
+  const tagList = (arr, cls='ptag') => arr.length
+    ? `<div class="ptags">${arr.map(t=>`<span class="${cls}">${t}</span>`).join('')}</div>`
+    : `<span class="pfield-empty">—</span>`;
+
+  return `
+    ${!enriched ? `
+    <div style="padding:14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e">
+      ⚠️ This partner hasn't been enriched yet. Run an enrichment to populate all 9 blocks.
+    </div>` : ''}
+
+    <!-- B1 IDENTITY -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 1 · Identity</span></div>
+      <div class="pblock-body">
+        <div class="prow">
+          <div class="pfield"><div class="pfield-label">HQ</div><div class="pfield-val">${emptyOr(p.hq)}</div></div>
+          <div class="pfield"><div class="pfield-label">Region</div><div class="pfield-val">${emptyOr(p.region)}</div></div>
+        </div>
+        <div class="prow">
+          <div class="pfield"><div class="pfield-label">Partner Type</div><div class="pfield-val">${emptyOr(p.partner_type)}</div></div>
+          <div class="pfield"><div class="pfield-label">Tier</div><div class="pfield-val">${emptyOr(p.tier)}</div></div>
+        </div>
+        <div class="prow">
+          <div class="pfield"><div class="pfield-label">Market Approach</div><div class="pfield-val">${emptyOr(p.market_approach)}</div></div>
+          <div class="pfield"><div class="pfield-label">Website</div><div class="pfield-val">${p.website ? `<a href="https://${p.website.replace(/^https?:\/\//,'')}" target="_blank">${p.website}</a>` : '<span class="pfield-empty">—</span>'}</div></div>
+        </div>
+        ${p.last_enriched ? `<div class="pfield" style="margin-top:6px"><div class="pfield-label">Last Enriched</div><div class="pfield-val">${p.last_enriched}</div></div>` : ''}
+      </div>
+    </div>
+
+    <!-- B2 STRENGTHS -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 2 · Strengths</span></div>
+      <div class="pblock-body">
+        <div class="pfield"><div class="pfield-label">Signature Capability</div><div class="pfield-val">${emptyOr(p.signature_capability)}</div></div>
+        <div class="pfield" style="margin-top:10px"><div class="pfield-label">Market Position</div><div class="pfield-val">${emptyOr(p.market_position)}</div></div>
+        ${differentiators.length ? `
+        <div class="pfield" style="margin-top:10px"><div class="pfield-label">Key Differentiators</div>
+          <ul class="bullet-list">${differentiators.map(d=>`<li>${d}</li>`).join('')}</ul>
+        </div>` : ''}
+        ${p.partner_voice ? `<div class="partner-voice">"${p.partner_voice}"</div>` : ''}
+      </div>
+    </div>
+
+    <!-- B3 COMMERCIAL -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 3 · Commercial</span></div>
+      <div class="pblock-body">
+        <div class="two-col-numbers">
+          <div class="pfield"><div class="pfield-label">ARR</div><div class="pfield-val big">${fmtUSD(p.arr)}</div></div>
+          <div class="pfield"><div class="pfield-label">Docks Live</div><div class="pfield-val big">${p.docks || '—'}</div></div>
+          ${p.pipeline_value ? `<div class="pfield"><div class="pfield-label">Pipeline</div><div class="pfield-val big">${fmtUSD(p.pipeline_value)}</div></div>` : ''}
+        </div>
+        ${deals.length ? `
+        <div class="section-sub">Pipeline Deals</div>
+        <div class="deal-list">
+          ${deals.map(d=>`
+            <div class="deal-row">
+              <div><div class="deal-name">${d.name||d.deal_name||'—'}</div>${d.end_customer?`<div class="deal-ec">${d.end_customer}</div>`:''}</div>
+              <div class="deal-right">
+                ${d.value||d.estimated_value ? `<span class="deal-val">${fmtUSD(d.value||d.estimated_value)}</span>` : ''}
+                ${d.stage||d.deal_stage ? `<span class="deal-stage">${d.stage||d.deal_stage}</span>` : ''}
+              </div>
+            </div>`).join('')}
+        </div>` : ''}
+      </div>
+    </div>
+
+    <!-- B4 PROOF -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 4 · Proof</span></div>
+      <div class="pblock-body">
+        <div class="prow">
+          <div class="pfield"><div class="pfield-label">Proof Status</div><div class="pfield-val">${emptyOr(p.proof_status)}</div></div>
+          <div class="pfield"><div class="pfield-label">Fortune 500 Customer</div><div class="pfield-val">No</div></div>
+        </div>
+        ${p.star_story ? `<div class="star-story">${p.star_story}</div>` : ''}
+        <div class="section-sub">Deployed Customers (${customers.length})</div>
+        ${customers.length ? `
+        <div class="customer-list">
+          ${customers.map(c=>`
+            <div class="customer-row ${c.verified===false||c.source?.includes('Pattern 3')?'unverified':''}">
+              <div class="customer-name">${c.name||c}</div>
+              ${c.source ? `<div class="customer-meta">${c.source}${c.arr?` · ARR ${fmtUSD(c.arr)}`:''}${c.deal?` · ${c.deal}`:''}</div>` : ''}
+            </div>`).join('')}
+        </div>` : `<span class="pfield-empty">No deployed customers confirmed.</span>`}
+      </div>
+    </div>
+
+    <!-- B5 DNA -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 5 · DNA</span></div>
+      <div class="pblock-body">
+        <div class="pfield"><div class="pfield-label">Primary Verticals</div>${tagList(verts1,'ptag ptag-orange')}</div>
+        <div class="pfield" style="margin-top:10px"><div class="pfield-label">Secondary Verticals</div>${tagList(verts2)}</div>
+        ${useCases.length ? `<div class="pfield" style="margin-top:10px"><div class="pfield-label">Proven Use Cases</div><ul class="bullet-list">${useCases.map(u=>`<li>${u}</li>`).join('')}</ul></div>` : ''}
+        <div class="pfield" style="margin-top:10px"><div class="pfield-label">Proven Geographies</div>${tagList(geos)}</div>
+      </div>
+    </div>
+
+    <!-- B6 CAPTAIN -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 6 · Captain</span></div>
+      <div class="pblock-body">
+        <div class="prow">
+          <div class="pfield"><div class="pfield-label">Key Contact</div><div class="pfield-val"><strong>${emptyOr(p.key_contact_name)}</strong></div></div>
+          <div class="pfield"><div class="pfield-label">Role</div><div class="pfield-val">${emptyOr(p.key_contact_role)}</div></div>
+        </div>
+        ${addContacts.length ? `<div class="pfield" style="margin-top:8px"><div class="pfield-label">Additional Contacts</div><ul class="bullet-list">${addContacts.map(c=>`<li>${typeof c==='string'?c:c.name}</li>`).join('')}</ul></div>` : ''}
+        <div class="prow" style="margin-top:10px">
+          <div class="pfield"><div class="pfield-label">Comm Frequency</div><div class="pfield-val">${emptyOr(p.comm_frequency)}</div></div>
+          <div class="pfield"><div class="pfield-label">Publicly Advocated</div><div class="pfield-val">${emptyOr(p.publicly_advocated)}</div></div>
+        </div>
+        ${p.captain_signal ? `<div class="pfield" style="margin-top:8px"><div class="pfield-label">Captain Signal</div><div class="pfield-val">${p.captain_signal}</div></div>` : ''}
+      </div>
+    </div>
+
+    <!-- B7 COMPETITIVE -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 7 · Competitive</span></div>
+      <div class="pblock-body">
+        <div class="prow">
+          <div class="pfield"><div class="pfield-label">Exclusivity</div><div class="pfield-val">${emptyOr(p.exclusivity)}</div></div>
+          <div class="pfield"><div class="pfield-label">Sells Competing Platforms</div><div class="pfield-val">${emptyOr(p.sells_competing_platforms)}</div></div>
+        </div>
+        <div class="pfield" style="margin-top:8px"><div class="pfield-label">Competitors Encountered</div><div class="pfield-val">${emptyOr(p.competitors_encountered)}</div></div>
+      </div>
+    </div>
+
+    <!-- B8 CAPABILITY -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 8 · Capability</span></div>
+      <div class="pblock-body">
+        <div class="pfield"><div class="pfield-label">Technical Depth</div><div class="pfield-val"><strong>${emptyOr(p.technical_depth)}</strong>${p.technical_depth_evidence ? ' — '+p.technical_depth_evidence : ''}</div></div>
+        <div class="prow" style="margin-top:10px">
+          <div class="pfield"><div class="pfield-label">Runs Own Marketing</div><div class="pfield-val">${emptyOr(p.runs_own_marketing)}</div></div>
+          <div class="pfield"><div class="pfield-label">Needs Co-Marketing</div><div class="pfield-val">${emptyOr(p.needs_co_marketing)}</div></div>
+        </div>
+        <div class="pfield" style="margin-top:10px"><div class="pfield-label">Languages</div>${tagList(languages.length ? languages : ['English'], 'ptag ptag-orange')}</div>
+      </div>
+    </div>
+
+    <!-- B9 ENABLEMENT -->
+    <div class="pblock">
+      <div class="pblock-header"><div class="pblock-dot"></div><span class="pblock-title">Block 9 · Enablement</span></div>
+      <div class="pblock-body">
+        <div class="prow">
+          <div class="pfield">
+            <div class="pfield-label">Activation</div>
+            <div style="margin-top:5px"><span class="act-badge ${actBadgeClass(p.activation)}" style="font-size:11px;padding:4px 12px">${p.activation||'—'}</span></div>
+          </div>
+          <div class="pfield"><div class="pfield-label">Localization</div>${tagList(localization.length?localization:['English'])}</div>
+        </div>
+        ${pillars.length ? `
+        <div class="pfield" style="margin-top:10px"><div class="pfield-label">Pillars Needed</div>
+          <div class="pillar-tags" style="margin-top:6px">${pillars.map(pl=>`<span class="pillar-tag">${pl}</span>`).join('')}</div>
+        </div>` : ''}
+        ${vertGuides.length ? `<div class="pfield" style="margin-top:10px"><div class="pfield-label">Vertical Guides</div>${tagList(vertGuides,'ptag ptag-orange')}</div>` : ''}
+        ${decks.length ? `
+        <div class="pfield" style="margin-top:10px"><div class="pfield-label">Decks to Build</div>
+          ${decks.map(d=>`<div style="padding:5px 8px;background:var(--bg);border-radius:4px;font-size:12px;margin-top:4px">📄 ${d}</div>`).join('')}
+        </div>` : ''}
+        ${p.notes ? `<div class="divider"></div><div class="pfield"><div class="pfield-label">Notes</div><div class="pfield-val" style="line-height:1.7">${p.notes}</div></div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+// ── KEYBOARD ─────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePanel();
+});
+
+// ── AUTO-LOAD ─────────────────────────────────────────────────────────────
+loadFromSupabase();
+</script>
+</body>
+</html>
