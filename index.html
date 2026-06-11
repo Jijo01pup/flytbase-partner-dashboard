@@ -117,6 +117,57 @@ body {
 .view-tab:hover { color: var(--text); }
 .view-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
 
+/* ── FEED ── */
+.feed-wrap { padding: 20px 24px; max-width: 860px; }
+.feed-header-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+.feed-title { font-family: 'Lora', Georgia, serif; font-size: 20px; font-weight: 600; color: var(--text); }
+.feed-sub { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+.feed-filters { display: flex; gap: 8px; }
+
+.feed-section { margin-bottom: 24px; }
+.feed-section-label {
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.feed-section-label .count {
+  background: var(--tag-bg); color: var(--secondary); padding: 1px 7px;
+  border-radius: 10px; font-size: 10px;
+}
+.p-urgent  { color: #B91C1C; }
+.p-high    { color: var(--orange); }
+.p-medium  { color: var(--warning); }
+.p-low     { color: var(--info); }
+
+.feed-item {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 14px 16px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 14px;
+  transition: box-shadow 150ms var(--ease), border-color 150ms var(--ease);
+  cursor: default;
+}
+.feed-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-color: #BBBDC4; }
+.feed-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot-urgent { background: #EF4444; }
+.dot-high   { background: var(--orange); }
+.dot-medium { background: var(--warning); }
+.dot-low    { background: var(--info); }
+
+.feed-item-body { flex: 1; }
+.feed-item-title { font-size: 14px; font-weight: 500; color: var(--text); line-height: 1.4; }
+.feed-item-meta { display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap; align-items: center; }
+.feed-item-context { font-size: 12px; color: var(--secondary); }
+.feed-item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.feed-partner-tag {
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.06em; padding: 2px 8px; border: 1px solid var(--border);
+  color: var(--secondary); white-space: nowrap;
+}
+.feed-region-tag {
+  font-family: 'Geist Mono', monospace; font-size: 10px;
+  color: var(--secondary); white-space: nowrap;
+}
+.feed-empty { text-align: center; padding: 48px 24px; color: var(--secondary); font-size: 14px; }
+
 /* ── AUDIT LOG ── */
 .audit-wrap { padding: 16px 24px; }
 .audit-filterbar {
@@ -485,6 +536,7 @@ a:hover { text-decoration: underline; }
 <!-- VIEW TABS -->
 <div class="view-tabs">
   <div class="view-tab active" id="tab-partners" onclick="switchView('partners')">Partners</div>
+  <div class="view-tab" id="tab-feed" onclick="switchView('feed')">Feed</div>
   <div class="view-tab" id="tab-audit" onclick="switchView('audit')">Audit Log</div>
 </div>
 
@@ -516,6 +568,33 @@ a:hover { text-decoration: underline; }
     <option value="Not enriched">Not enriched</option>
   </select>
   <button class="filter-clear" id="clearFiltersBtn" onclick="clearFilters()">Clear filters</button>
+</div>
+
+<!-- FEED VIEW -->
+<div id="feedView" style="display:none">
+  <div class="feed-wrap">
+    <div class="feed-header-row">
+      <div class="feed-title-block">
+        <div class="feed-title">Your Action Feed</div>
+        <div class="feed-sub">Priority items generated from live partner data</div>
+      </div>
+      <div class="feed-filters">
+        <select class="filter-select" id="feedRegionFilter" onchange="renderFeed()" style="min-width:130px">
+          <option value="All">All regions</option>
+          <option value="NSA">NSA</option>
+          <option value="Europe">Europe</option>
+          <option value="RoW">RoW</option>
+        </select>
+        <select class="filter-select" id="feedTierFilter" onchange="renderFeed()" style="min-width:110px">
+          <option value="All">All tiers</option>
+          <option value="T1">T1 only</option>
+          <option value="T2">T2 only</option>
+          <option value="T3">T3 only</option>
+        </select>
+      </div>
+    </div>
+    <div id="feedItems"></div>
+  </div>
 </div>
 
 <!-- AUDIT LOG VIEW -->
@@ -1077,11 +1156,209 @@ let currentView = 'partners';
 function switchView(view) {
   currentView = view;
   document.getElementById('partnersView').style.display = view === 'partners' ? '' : 'none';
-  document.getElementById('auditView').style.display   = view === 'audit'    ? '' : 'none';
-  document.querySelector('.filter-bar').style.display  = view === 'partners' ? '' : 'none';
+  document.getElementById('feedView').style.display     = view === 'feed'     ? '' : 'none';
+  document.getElementById('auditView').style.display    = view === 'audit'    ? '' : 'none';
+  document.querySelector('.filter-bar').style.display   = view === 'partners' ? '' : 'none';
   document.getElementById('tab-partners').classList.toggle('active', view === 'partners');
+  document.getElementById('tab-feed').classList.toggle('active', view === 'feed');
   document.getElementById('tab-audit').classList.toggle('active', view === 'audit');
   if (view === 'audit') loadAuditLog();
+  if (view === 'feed')  renderFeed();
+}
+
+// ── FEED ──────────────────────────────────────────────────────────────────
+function regionGroup(region) {
+  const r = (region || '').toLowerCase();
+  if (r.includes('north america') || r.includes('latin')) return 'NSA';
+  if (r.includes('eu') || r.includes('europe')) return 'Europe';
+  return 'RoW';
+}
+
+function generateFeedItems(partners) {
+  const items = [];
+
+  partners.forEach(p => {
+    const tierRaw = (p.tier || '').toUpperCase();
+    const isT1 = tierRaw === 'T1';
+    const isT2 = tierRaw === 'T2';
+    const revenue  = Number(p.revenue || 0);
+    const pipeline = Number(p.pipeline_value || 0);
+    const deals    = parseDeals(p.pipeline_deals);
+    const rg       = regionGroup(p.region);
+
+    // ── URGENT: hot deals close to closing ──
+    deals.forEach(d => {
+      const stage = (d.stage || '').toLowerCase().replace(/_/g,' ');
+      const hotStages = ['negotiation','contract sent','contract signed','contract_sent','contract_signed'];
+      if (hotStages.some(s => (d.stage||'').toLowerCase().includes(s.replace(' ','_')) || (d.stage||'').toLowerCase() === s)) {
+        items.push({
+          priority: 1, label: 'urgent',
+          title: `Close ${d.end_customer || d.deal_name || 'deal'} with ${p.partner_name}`,
+          context: `${fmtUSD(Number(d.value||0))} · ${stage}`,
+          partner: p.partner_name, tier: p.tier, region: rg
+        });
+      }
+    });
+
+    // ── URGENT: proposal_pending deals with value ──
+    deals.forEach(d => {
+      if ((d.stage||'').toLowerCase() === 'proposal_pending' && Number(d.value||0) > 20000) {
+        items.push({
+          priority: 1, label: 'urgent',
+          title: `Follow up on ${d.end_customer || d.deal_name} proposal — ${p.partner_name}`,
+          context: `${fmtUSD(Number(d.value||0))} · proposal pending`,
+          partner: p.partner_name, tier: p.tier, region: rg
+        });
+      }
+    });
+
+    // ── HIGH: T1 with large stuck pipeline ──
+    if (isT1) {
+      deals.forEach(d => {
+        const stage = (d.stage||'').toLowerCase();
+        const earlyStages = ['discovery','qualified','contact_made'];
+        if (earlyStages.includes(stage) && Number(d.value||0) >= 50000) {
+          items.push({
+            priority: 2, label: 'high',
+            title: `Move ${d.end_customer || d.deal_name} out of ${stage.replace('_',' ')} — ${p.partner_name}`,
+            context: `${fmtUSD(Number(d.value||0))} stalled in ${stage.replace('_',' ')}`,
+            partner: p.partner_name, tier: p.tier, region: rg
+          });
+        }
+      });
+    }
+
+    // ── HIGH: T1 with zero pipeline ──
+    if (isT1 && pipeline === 0) {
+      items.push({
+        priority: 2, label: 'high',
+        title: `Build pipeline with ${p.partner_name} — T1 with no open deals`,
+        context: revenue > 0 ? `Has ${fmtUSD(revenue)} revenue but no active pipeline` : 'No revenue or pipeline',
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── HIGH: T1/T2 not enriched ──
+    if ((isT1 || isT2) && !isEnriched(p)) {
+      items.push({
+        priority: 2, label: 'high',
+        title: `Enrich ${p.partner_name} — ${p.tier} partner missing profile data`,
+        context: 'No activation stage, verticals, or contact data',
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── MEDIUM: case study in progress ──
+    if (p.proof_status === 'in_progress') {
+      items.push({
+        priority: 3, label: 'medium',
+        title: `Complete case study for ${p.partner_name}`,
+        context: 'Proof status marked in progress — needs finalising',
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── MEDIUM: T1/T2 with co-marketing needed ──
+    if ((isT1 || isT2) && (p.needs_co_marketing || '').toLowerCase() === 'yes') {
+      items.push({
+        priority: 3, label: 'medium',
+        title: `Plan co-marketing activation with ${p.partner_name}`,
+        context: `${p.tier} · ${p.region} · co-marketing flagged needed`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── MEDIUM: T2 with pipeline but no revenue ──
+    if (isT2 && pipeline > 0 && revenue === 0) {
+      items.push({
+        priority: 3, label: 'medium',
+        title: `Convert pipeline to revenue — ${p.partner_name}`,
+        context: `${fmtUSD(pipeline)} in pipeline, $0 revenue closed`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── LOW: T2 with no pipeline and no revenue ──
+    if (isT2 && pipeline === 0 && revenue === 0) {
+      items.push({
+        priority: 4, label: 'low',
+        title: `Nurture ${p.partner_name} — T2 with no deals`,
+        context: 'No revenue or pipeline in system',
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── LOW: T3 with large pipeline (watch) ──
+    if (!isT1 && !isT2 && pipeline >= 50000) {
+      items.push({
+        priority: 4, label: 'low',
+        title: `Watch ${p.partner_name} — T3 with significant pipeline`,
+        context: `${fmtUSD(pipeline)} pipeline · consider upgrading to T2`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+  });
+
+  return items.sort((a, b) => a.priority - b.priority || a.partner.localeCompare(b.partner));
+}
+
+function renderFeed() {
+  if (!ALL_PARTNERS.length) {
+    document.getElementById('feedItems').innerHTML =
+      '<div class="feed-empty">Loading partner data…</div>';
+    return;
+  }
+
+  const regionF = (document.getElementById('feedRegionFilter')||{}).value || 'All';
+  const tierF   = (document.getElementById('feedTierFilter')||{}).value   || 'All';
+
+  let partners = ALL_PARTNERS;
+  if (regionF !== 'All') partners = partners.filter(p => regionGroup(p.region) === regionF);
+  if (tierF   !== 'All') partners = partners.filter(p => (p.tier||'').toUpperCase().startsWith(tierF));
+
+  const items = generateFeedItems(partners);
+
+  if (!items.length) {
+    document.getElementById('feedItems').innerHTML =
+      '<div class="feed-empty">No action items — everything looks good!</div>';
+    return;
+  }
+
+  const groups = [
+    { key: 'urgent', label: 'Urgent', cls: 'p-urgent', dotCls: 'dot-urgent' },
+    { key: 'high',   label: 'High',   cls: 'p-high',   dotCls: 'dot-high'   },
+    { key: 'medium', label: 'Medium', cls: 'p-medium', dotCls: 'dot-medium' },
+    { key: 'low',    label: 'Low',    cls: 'p-low',    dotCls: 'dot-low'    },
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    const grpItems = items.filter(i => i.label === g.key);
+    if (!grpItems.length) return;
+    html += `
+      <div class="feed-section">
+        <div class="feed-section-label ${g.cls}">
+          ${g.label.toUpperCase()}
+          <span class="count">${grpItems.length}</span>
+        </div>
+        ${grpItems.map(item => `
+          <div class="feed-item">
+            <div class="feed-dot ${g.dotCls}"></div>
+            <div class="feed-item-body">
+              <div class="feed-item-title">${item.title}</div>
+              <div class="feed-item-meta">
+                <span class="feed-item-context">${item.context}</span>
+              </div>
+            </div>
+            <div class="feed-item-right">
+              ${item.tier ? `<span class="card-tier ${tierBadge(item.tier)}" style="font-size:9px;padding:2px 6px">${tierLabel(item.tier)}</span>` : ''}
+              <span class="feed-region-tag">${item.region}</span>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  });
+
+  document.getElementById('feedItems').innerHTML = html;
 }
 
 // ── AUDIT LOG ─────────────────────────────────────────────────────────────
