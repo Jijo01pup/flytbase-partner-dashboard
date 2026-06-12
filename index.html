@@ -117,12 +117,76 @@ body {
 .view-tab:hover { color: var(--text); }
 .view-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
 
+/* ── PROSPECTS ── */
+.prospects-wrap { padding: 20px 24px; max-width: 900px; }
+.prospects-header-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+.prospect-card {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 16px 18px; margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 16px;
+  transition: box-shadow 150ms var(--ease);
+}
+.prospect-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.prospect-card.confirmed { border-left: 3px solid var(--success); opacity: 0.7; }
+.prospect-card.rejected  { border-left: 3px solid var(--border); opacity: 0.5; }
+.prospect-body { flex: 1; }
+.prospect-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.prospect-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; }
+.prospect-meta span { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--secondary); }
+.prospect-message {
+  margin-top: 8px; font-size: 12.5px; color: var(--secondary);
+  line-height: 1.55; background: var(--bg); padding: 8px 10px;
+  border-left: 2px solid var(--border); font-style: italic;
+}
+.prospect-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start; margin-top: 2px; }
+.btn-confirm {
+  padding: 6px 16px; background: var(--success); color: white; border: none;
+  font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
+  transition: background 150ms var(--ease);
+}
+.btn-confirm:hover { background: #2d6b56; }
+.btn-reject {
+  padding: 6px 14px; background: var(--surface); color: var(--secondary);
+  border: 1px solid var(--border); font-family: 'Geist Mono', monospace;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: border-color 150ms var(--ease), color 150ms var(--ease);
+}
+.btn-reject:hover { border-color: var(--error); color: var(--error); }
+.prospect-status-tag {
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px;
+}
+.status-confirmed { background: var(--success-bg); color: var(--success); }
+.status-rejected  { background: var(--tag-bg); color: var(--secondary); }
+.prospect-date { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--secondary); white-space: nowrap; margin-top: 4px; }
+.prospects-empty { text-align: center; padding: 48px 24px; color: var(--secondary); font-size: 14px; }
+.prospects-count { font-family: 'Geist Mono', monospace; font-size: 11px; color: var(--secondary); margin-bottom: 12px; }
+
 /* ── FEED ── */
 .feed-wrap { padding: 20px 24px; max-width: 860px; }
 .feed-header-row { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
 .feed-title { font-family: 'Lora', Georgia, serif; font-size: 20px; font-weight: 600; color: var(--text); }
 .feed-sub { font-family: 'Geist Mono', monospace; font-size: 10px; color: var(--secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
 .feed-filters { display: flex; gap: 8px; }
+
+.feed-cat-bar {
+  display: flex; gap: 6px; flex-wrap: wrap; padding: 0 0 18px 0;
+}
+.feed-cat {
+  font-family: 'Geist Mono', monospace; font-size: 10px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 12px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--secondary); cursor: pointer; transition: all 150ms var(--ease);
+  display: flex; align-items: center; gap: 6px;
+}
+.feed-cat:hover { border-color: var(--orange); color: var(--orange); }
+.feed-cat.active { background: var(--orange); border-color: var(--orange); color: white; }
+.feed-cat-count {
+  background: rgba(0,0,0,0.12); border-radius: 10px;
+  padding: 0 5px; font-size: 10px; font-weight: 700; min-width: 16px; text-align: center;
+}
+.feed-cat.active .feed-cat-count { background: rgba(255,255,255,0.25); }
 
 .feed-section { margin-bottom: 24px; }
 .feed-section-label {
@@ -537,6 +601,7 @@ a:hover { text-decoration: underline; }
 <div class="view-tabs">
   <div class="view-tab active" id="tab-partners" onclick="switchView('partners')">Partners</div>
   <div class="view-tab" id="tab-feed" onclick="switchView('feed')">Feed</div>
+  <div class="view-tab" id="tab-prospects" onclick="switchView('prospects')">Prospects <span id="prospectsBadge" style="display:none;background:#EF4444;color:white;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px;font-family:'Geist Mono',monospace;font-weight:700"></span></div>
   <div class="view-tab" id="tab-audit" onclick="switchView('audit')">Audit Log</div>
 </div>
 
@@ -570,6 +635,28 @@ a:hover { text-decoration: underline; }
   <button class="filter-clear" id="clearFiltersBtn" onclick="clearFilters()">Clear filters</button>
 </div>
 
+<!-- PROSPECTS VIEW -->
+<div id="prospectsView" style="display:none">
+  <div class="prospects-wrap">
+    <div class="prospects-header-row">
+      <div>
+        <div class="feed-title">Inbound Prospects</div>
+        <div class="feed-sub">Discovered from #website-leads · confirm to add to partner database</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select class="filter-select" id="prospectsStatusFilter" onchange="loadProspects()" style="min-width:130px">
+          <option value="pending">Pending review</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div id="prospectsWrap">
+      <div class="loading-state"><div class="spinner"></div><div>Loading prospects…</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- FEED VIEW -->
 <div id="feedView" style="display:none">
   <div class="feed-wrap">
@@ -578,20 +665,13 @@ a:hover { text-decoration: underline; }
         <div class="feed-title">Your Action Feed</div>
         <div class="feed-sub">Priority items generated from live partner data</div>
       </div>
-      <div class="feed-filters">
-        <select class="filter-select" id="feedRegionFilter" onchange="renderFeed()" style="min-width:130px">
-          <option value="All">All regions</option>
-          <option value="NSA">NSA</option>
-          <option value="Europe">Europe</option>
-          <option value="RoW">RoW</option>
-        </select>
-        <select class="filter-select" id="feedTierFilter" onchange="renderFeed()" style="min-width:110px">
-          <option value="All">All tiers</option>
-          <option value="T1">T1 only</option>
-          <option value="T2">T2 only</option>
-          <option value="T3">T3 only</option>
-        </select>
-      </div>
+    </div>
+    <div class="feed-cat-bar" id="feedCatBar">
+      <button class="feed-cat active" data-cat="ALL" onclick="setFeedCat('ALL')">ALL <span id="fc-ALL" class="feed-cat-count">0</span></button>
+      <button class="feed-cat" data-cat="UNBLOCK DEAL" onclick="setFeedCat('UNBLOCK DEAL')">UNBLOCK DEAL <span id="fc-UNBLOCK DEAL" class="feed-cat-count">0</span></button>
+      <button class="feed-cat" data-cat="ACTIVATE STORY" onclick="setFeedCat('ACTIVATE STORY')">ACTIVATE STORY <span id="fc-ACTIVATE STORY" class="feed-cat-count">0</span></button>
+      <button class="feed-cat" data-cat="ENABLEMENT GAP" onclick="setFeedCat('ENABLEMENT GAP')">ENABLEMENT GAP <span id="fc-ENABLEMENT GAP" class="feed-cat-count">0</span></button>
+      <button class="feed-cat" data-cat="RE-ENGAGE" onclick="setFeedCat('RE-ENGAGE')">RE-ENGAGE <span id="fc-RE-ENGAGE" class="feed-cat-count">0</span></button>
     </div>
     <div id="feedItems"></div>
   </div>
@@ -624,6 +704,105 @@ a:hover { text-decoration: underline; }
       </div>
     </div>
   </div>
+</div>
+
+<!-- FEED LOGIC VIEW -->
+<div id="logicView" style="display:none; max-width:900px; margin:0 auto; padding:32px 24px;">
+
+  <div style="margin-bottom:32px;">
+    <div style="font-family:'Geist Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);margin-bottom:8px;">Reference</div>
+    <h1 style="font-size:24px;font-weight:700;color:var(--text);margin-bottom:6px;">Partner Intelligence Feed Logic</h1>
+    <p style="color:var(--secondary);font-size:13px;line-height:1.6;">The feed is Shruti's daily action list. Every item answers: what do I do, for whom, and why right now. It reads from the partner database and is refreshed every weekday at 8AM IST from FlytForce call notes.</p>
+  </div>
+
+  <!-- Priority stack -->
+  <div style="background:var(--surface);border:1px solid var(--border);margin-bottom:32px;">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:#1A1A1A;">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;">4 Buckets · Priority Stack</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:var(--bg);">
+          <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--secondary);font-family:'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);">#</th>
+          <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--secondary);font-family:'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);">Bucket</th>
+          <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--secondary);font-family:'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);">Priority</th>
+          <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--secondary);font-family:'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);">One-line description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--orange);border-bottom:1px solid var(--border);">1</td><td style="padding:10px 14px;font-size:13px;font-weight:600;border-bottom:1px solid var(--border);">UNBLOCK DEAL</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);"><span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;color:#C0392B;">URGENT</span></td><td style="padding:10px 14px;font-size:13px;color:var(--secondary);border-bottom:1px solid var(--border);">Tender or competitor in the room — send proof/positioning now</td></tr>
+        <tr style="background:var(--bg);"><td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--orange);border-bottom:1px solid var(--border);">2</td><td style="padding:10px 14px;font-size:13px;font-weight:600;border-bottom:1px solid var(--border);">ACTIVATE STORY</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);"><span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;color:#D97706;">HIGH</span></td><td style="padding:10px 14px;font-size:13px;color:var(--secondary);border-bottom:1px solid var(--border);">Live customer + growth signal — capture the story before the moment passes</td></tr>
+        <tr><td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--orange);border-bottom:1px solid var(--border);">3</td><td style="padding:10px 14px;font-size:13px;font-weight:600;border-bottom:1px solid var(--border);">ENABLEMENT GAP</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);"><span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;color:#D97706;">HIGH</span></td><td style="padding:10px 14px;font-size:13px;color:var(--secondary);border-bottom:1px solid var(--border);">Partner explicitly asked for a specific marketing material in call notes</td></tr>
+        <tr style="background:var(--bg);"><td style="padding:10px 14px;font-size:13px;font-weight:700;color:var(--orange);">4</td><td style="padding:10px 14px;font-size:13px;font-weight:600;">RE-ENGAGE</td><td style="padding:10px 14px;"><span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;color:#2E7D32;">MEDIUM</span></td><td style="padding:10px 14px;font-size:13px;color:var(--secondary);">Pipeline exists but comms have gone quiet — reach out with support</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bucket detail cards -->
+  <div id="logicBuckets"></div>
+
+  <!-- What marketing can offer -->
+  <div style="background:var(--surface);border:1px solid var(--border);margin-bottom:32px;">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:#1A1A1A;">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;">What Partner Marketing Can + Cannot Offer</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+      <div style="padding:20px 20px;border-right:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;font-family:'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--success);margin-bottom:12px;">Can offer</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:13px;color:var(--text);">Market-entry materials — vertical guides, proof packs, case studies, competitive positioning decks, one-pagers, localised collateral</div>
+          <div style="font-size:13px;color:var(--text);">Event presence — co-presenting at industry events, joint webinars, partner showcases</div>
+        </div>
+      </div>
+      <div style="padding:20px 20px;">
+        <div style="font-size:11px;font-weight:700;font-family:'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--error);margin-bottom:12px;">Does NOT do</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="font-size:13px;color:var(--secondary);">Email sequences or drip campaigns</div>
+          <div style="font-size:13px;color:var(--secondary);">LinkedIn targeting or paid media</div>
+          <div style="font-size:13px;color:var(--secondary);">Demand-gen campaigns on behalf of partners</div>
+          <div style="font-size:13px;color:var(--secondary);">MDF management</div>
+          <div style="font-size:13px;color:var(--secondary);">Technical integration support</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signal keyword reference -->
+  <div style="background:var(--surface);border:1px solid var(--border);margin-bottom:32px;">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:#1A1A1A;">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;">Signal Keyword Reference</span>
+    </div>
+    <div style="padding:16px 18px;font-size:12px;color:var(--secondary);border-bottom:1px solid var(--border);">The scheduled task scans the <code style="font-family:'Geist Mono',monospace;background:var(--bg);padding:1px 5px;border-radius:3px;">notes</code> field for these keywords when reading FlytForce transcripts and Gmail each weekday morning.</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:var(--bg);">
+        <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--secondary);font-family:'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);width:180px;">Bucket</th>
+        <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--secondary);font-family:'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);">Keywords / Patterns</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:10px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px;color:var(--orange);">UNBLOCK DEAL</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);font-family:'Geist Mono',monospace;font-size:11px;color:var(--text);line-height:1.6;">tender, rfp, competitor, competing, comparing, flighthub, flight hub, alternative platform, evaluating platforms</td></tr>
+        <tr style="background:var(--bg);"><td style="padding:10px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px;color:var(--orange);">ACTIVATE STORY</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);font-family:'Geist Mono',monospace;font-size:11px;color:var(--text);line-height:1.6;">scaling, adding docks, more docks, upgrade, expanding, additional sites, new site, renewal, renewed, second deployment, growing, more licenses, follow-on, asking for more</td></tr>
+        <tr><td style="padding:10px 14px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px;color:var(--orange);">ENABLEMENT GAP</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);font-family:'Geist Mono',monospace;font-size:11px;color:var(--text);line-height:1.6;">asked for / requested + [deck, guide, video, case study, collateral, one-pager, materials, localization, brochure, whitepaper, playbook, positioning]</td></tr>
+        <tr style="background:var(--bg);"><td style="padding:10px 14px;font-weight:600;font-size:12px;color:var(--orange);">RE-ENGAGE</td><td style="padding:10px 14px;font-family:'Geist Mono',monospace;font-size:11px;color:var(--secondary);line-height:1.6;">No keyword scan — triggers on pipeline_value &gt; 0 + comm_frequency not in [weekly, monthly]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Scheduled task -->
+  <div style="background:var(--surface);border:1px solid var(--border);">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:#1A1A1A;">
+      <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff;">Scheduled Refresh Task</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <tbody>
+        <tr><td style="padding:9px 14px;font-size:12px;font-weight:600;color:var(--secondary);width:200px;border-bottom:1px solid var(--border);">Task name</td><td style="padding:9px 14px;font-family:'Geist Mono',monospace;font-size:12px;border-bottom:1px solid var(--border);">partner-feed-refresh</td></tr>
+        <tr style="background:var(--bg);"><td style="padding:9px 14px;font-size:12px;font-weight:600;color:var(--secondary);border-bottom:1px solid var(--border);">Schedule</td><td style="padding:9px 14px;font-size:13px;border-bottom:1px solid var(--border);">Weekdays, 8:00 AM IST</td></tr>
+        <tr><td style="padding:9px 14px;font-size:12px;font-weight:600;color:var(--secondary);border-bottom:1px solid var(--border);">Data sources</td><td style="padding:9px 14px;font-size:13px;border-bottom:1px solid var(--border);">FlytForce call transcripts, FlytForce highlights, Gmail threads</td></tr>
+        <tr style="background:var(--bg);"><td style="padding:9px 14px;font-size:12px;font-weight:600;color:var(--secondary);border-bottom:1px solid var(--border);">Writes to</td><td style="padding:9px 14px;font-size:13px;border-bottom:1px solid var(--border);">Supabase partners table — appends [SIGNAL] lines to notes field</td></tr>
+        <tr><td style="padding:9px 14px;font-size:12px;font-weight:600;color:var(--secondary);">Notifies</td><td style="padding:9px 14px;font-size:13px;">#partner-marketing Slack — summary of new signals found</td></tr>
+      </tbody>
+    </table>
+  </div>
+
 </div>
 
 <!-- MAIN -->
@@ -1155,15 +1334,270 @@ document.addEventListener('keydown', e => {
 let currentView = 'partners';
 function switchView(view) {
   currentView = view;
-  document.getElementById('partnersView').style.display = view === 'partners' ? '' : 'none';
-  document.getElementById('feedView').style.display     = view === 'feed'     ? '' : 'none';
-  document.getElementById('auditView').style.display    = view === 'audit'    ? '' : 'none';
-  document.querySelector('.filter-bar').style.display   = view === 'partners' ? '' : 'none';
-  document.getElementById('tab-partners').classList.toggle('active', view === 'partners');
-  document.getElementById('tab-feed').classList.toggle('active', view === 'feed');
-  document.getElementById('tab-audit').classList.toggle('active', view === 'audit');
-  if (view === 'audit') loadAuditLog();
-  if (view === 'feed')  renderFeed();
+  document.getElementById('partnersView').style.display   = view === 'partners'  ? '' : 'none';
+  document.getElementById('feedView').style.display       = view === 'feed'      ? '' : 'none';
+  document.getElementById('prospectsView').style.display  = view === 'prospects' ? '' : 'none';
+  document.getElementById('auditView').style.display      = view === 'audit'     ? '' : 'none';
+  document.getElementById('logicView').style.display      = view === 'logic'     ? '' : 'none';
+  document.querySelector('.filter-bar').style.display     = view === 'partners'  ? '' : 'none';
+  ['partners','feed','prospects','audit'].forEach(v => {
+    const el = document.getElementById(`tab-${v}`);
+    if (el) el.classList.toggle('active', view === v);
+  });
+  if (view === 'audit')     loadAuditLog();
+  if (view === 'feed')      renderFeed();
+  if (view === 'prospects') loadProspects();
+  if (view === 'logic')     renderFeedLogic();
+}
+
+// ── FEED LOGIC ────────────────────────────────────────────────────────────
+function renderFeedLogic() {
+  const wrap = document.getElementById('logicBuckets');
+  if (wrap.dataset.rendered) return;
+  wrap.dataset.rendered = '1';
+
+  const buckets = [
+    {
+      num: '1', name: 'UNBLOCK DEAL', priority: 'URGENT', priorityColor: '#C0392B',
+      source: 'Partner notes (scanned from FlytForce call transcripts + Gmail)',
+      trigger: 'Notes contain: tender, rfp, competitor, competing, comparing, flighthub, alternative platform, evaluating platforms',
+      action: 'Tender/RFP: send proof pack and vertical case study before submission deadline. Competitor: send competitive positioning and customer references.',
+      examples: [
+        'Droprise (T2) — $210K Belgian Police Tender',
+        'Securitas Spain (T2) — $170K Airbus Tender',
+        'Kokba (T1) — $100K Red Sea Global RFP',
+        'ADESCO (T1) — $98K G4S comparing FlytBase vs FlightHub 2',
+        'AISC / Atheeb (T2) — $77K Sharjah Police RFP',
+        'Groupe Protec (T1) — $71K French Military tender',
+      ],
+      notFired: [
+        'Technical blocks (SSO integration, API issues) — that is engineering',
+        'Payment deadlines — that is finance',
+        'Stalled deals / slow clients — that is sales',
+        'Partners with no response to FlytBase outreach — that is partner ops',
+      ]
+    },
+    {
+      num: '2', name: 'ACTIVATE STORY', priority: 'HIGH', priorityColor: '#D97706',
+      source: 'Enriched partner profile (customers list, revenue, expansion signals in notes)',
+      trigger: 'Customers exist AND (revenue > 0 OR notes mention: scaling, adding docks, more docks, upgrade, expanding, renewal, second deployment, growing, asking for more)',
+      action: 'Brief the partner. Run a customer interview. Write the case study. Publish before the story gets stale.',
+      examples: [
+        'AI View Group (T1) — Italian Railways, 18 docks, $47K revenue, in progress',
+        'Walross Tech (T1) — SkyGuard + Scantibodies MX, $41K revenue, in progress',
+        'DSLR Pros (T2) — Denver Water + Morgan Protection, $31K revenue, in progress',
+        'Titan Protection (T2) — 5 live US sites, $18K revenue, expanding',
+        'DroneStars (T2) — Border Customs NL + Port of Amsterdam, expanding',
+        'Ocadrones (T2) — BYD Brazil + Shock-Seg + CPPSARP, expanding',
+        'IBN Firnas (T2) — OQGN 3 docks + Ministry of Housing + Nama Water',
+      ],
+      notFired: [
+        'Partners with proof_status = verified (story already published)',
+        'Partners with no named customers (nothing to feature)',
+        'Pipeline deals — a deal is not a deployed customer',
+      ]
+    },
+    {
+      num: '3', name: 'ENABLEMENT GAP', priority: 'HIGH', priorityColor: '#D97706',
+      source: 'Partner call notes and meeting transcripts (FlytForce + Gmail)',
+      trigger: 'Notes match: asked for / requested [deck, guide, video, case study, collateral, one-pager, materials, localization, whitepaper, playbook, positioning]. OR: T1 partner with incomplete profile (no story, no signature capability).',
+      action: 'Build or send exactly what was asked for. For T1 incomplete profiles: run the kundali enrichment first.',
+      examples: [
+        'DroneStars (T2) — requested Senhive integration product video',
+        'LUGN (T2) — requested Dutch-language materials',
+        'Titan Protection (T2) — needs FlytBase positioning support',
+        'Any T1 with no star_story and no signature_capability',
+      ],
+      notFired: [
+        'Product feature requests (wants Verkos AI on-prem) — that is engineering',
+        'Internal ops notes (needs re-engagement) — not a partner ask',
+        'Commercial asks (requested bundle discount) — that is sales',
+        'Vague notes without a specific material mentioned',
+      ]
+    },
+    {
+      num: '4', name: 'RE-ENGAGE', priority: 'MEDIUM', priorityColor: '#2E7D32',
+      source: 'Supabase: pipeline_value and comm_frequency fields',
+      trigger: 'Tier is T2 or T3 AND pipeline_value > 0 AND comm_frequency is NOT weekly or monthly (i.e. Low, Quarterly, Unknown, or blank)',
+      action: 'Reach out. Offer market-entry materials and event presence. Do not offer email sequences, LinkedIn targeting, or demand-gen campaigns.',
+      examples: [
+        'Traf Signal Panama (T3) — $920K pipeline, no contact',
+        'ICQ Tech (T3) — $279K pipeline, unknown comms',
+        'Gulfnet (T3) — $250K pipeline, unknown comms',
+        'Securitas Spain (T2) — $170K pipeline, Low comms',
+        'Canusa (T3) — $100K Shell offshore pipeline, unknown comms',
+        'Wisemate (T3) — $100K SEC pipeline, outbound only',
+      ],
+      notFired: [
+        'T1 partners (handled separately via direct account plans)',
+        'Partners with zero pipeline — nothing is cooking',
+        'Weekly or monthly partners — already engaged',
+      ]
+    }
+  ];
+
+  wrap.innerHTML = buckets.map(b => `
+    <div style="background:var(--surface);border:1px solid var(--border);margin-bottom:24px;">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);background:#1A1A1A;display:flex;align-items:center;gap:12px;">
+        <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;color:var(--orange);">${b.num}</span>
+        <span style="font-family:'Geist Mono',monospace;font-size:13px;font-weight:700;color:#fff;letter-spacing:.04em;">${b.name}</span>
+        <span style="font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;color:${b.priorityColor};margin-left:4px;">${b.priority}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:140px 1fr;border-bottom:1px solid var(--border);">
+        <div style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--secondary);background:var(--bg);border-right:1px solid var(--border);">Signal source</div>
+        <div style="padding:10px 14px;font-size:13px;color:var(--text);">${b.source}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:140px 1fr;border-bottom:1px solid var(--border);">
+        <div style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--secondary);background:var(--bg);border-right:1px solid var(--border);">Trigger</div>
+        <div style="padding:10px 14px;font-size:13px;color:var(--text);">${b.trigger}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:140px 1fr;border-bottom:1px solid var(--border);">
+        <div style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--secondary);background:var(--bg);border-right:1px solid var(--border);">Your action</div>
+        <div style="padding:10px 14px;font-size:13px;color:var(--text);">${b.action}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:140px 1fr;border-bottom:1px solid var(--border);">
+        <div style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--secondary);background:var(--bg);border-right:1px solid var(--border);">Examples</div>
+        <div style="padding:10px 14px;">${b.examples.map(e => `<div style="font-size:13px;color:var(--text);padding:2px 0;">• ${e}</div>`).join('')}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:140px 1fr;">
+        <div style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--secondary);background:var(--bg);border-right:1px solid var(--border);">Does NOT fire for</div>
+        <div style="padding:10px 14px;">${b.notFired.map(e => `<div style="font-size:13px;color:var(--secondary);padding:2px 0;">• ${e}</div>`).join('')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── PROSPECTS ─────────────────────────────────────────────────────────────
+async function loadProspects() {
+  document.getElementById('prospectsWrap').innerHTML =
+    '<div class="loading-state"><div class="spinner"></div><div>Loading…</div></div>';
+
+  const status = document.getElementById('prospectsStatusFilter').value;
+  const url = `${SUPABASE_URL}/rest/v1/partner_prospects?select=*&status=eq.${status}&order=discovered_at.desc&limit=100`;
+
+  try {
+    const r = await fetch(url, {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const rows = await r.json();
+    renderProspects(rows, status);
+    // Update badge count for pending
+    if (status === 'pending') {
+      const badge = document.getElementById('prospectsBadge');
+      if (rows.length > 0) { badge.textContent = rows.length; badge.style.display = 'inline'; }
+      else badge.style.display = 'none';
+    }
+  } catch(e) {
+    document.getElementById('prospectsWrap').innerHTML =
+      `<div class="prospects-empty">Could not load prospects: ${e.message}</div>`;
+  }
+}
+
+async function checkProspectsBadge() {
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/partner_prospects?select=id&status=eq.pending`,
+      { headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` } }
+    );
+    const rows = await r.json();
+    const badge = document.getElementById('prospectsBadge');
+    if (rows.length > 0) { badge.textContent = rows.length; badge.style.display = 'inline'; }
+    else badge.style.display = 'none';
+  } catch(e) {}
+}
+
+function renderProspects(rows, status) {
+  if (!rows.length) {
+    const msgs = { pending: 'No new prospects waiting for review.', confirmed: 'No confirmed prospects yet.', rejected: 'No rejected prospects.' };
+    document.getElementById('prospectsWrap').innerHTML =
+      `<div class="prospects-empty">${msgs[status] || 'Nothing here.'}</div>`;
+    return;
+  }
+
+  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '';
+
+  const html = `
+    <div class="prospects-count">${rows.length} prospect${rows.length === 1 ? '' : 's'}</div>
+    ${rows.map(p => `
+      <div class="prospect-card ${p.status}" id="prospect-${p.id}">
+        <div class="prospect-body">
+          <div class="prospect-name">${p.company_name}</div>
+          <div class="prospect-meta">
+            ${p.region    ? `<span>📍 ${p.region}</span>` : ''}
+            ${p.vertical  ? `<span>🏭 ${p.vertical}</span>` : ''}
+            ${p.website   ? `<span>🌐 ${p.website}</span>` : ''}
+            ${p.contact_name  ? `<span>👤 ${p.contact_name}</span>` : ''}
+            ${p.contact_email ? `<span>✉️ ${p.contact_email}</span>` : ''}
+          </div>
+          ${p.slack_message ? `<div class="prospect-message">"${p.slack_message}"</div>` : ''}
+          ${p.notes ? `<div style="margin-top:6px;font-size:12.5px;color:var(--secondary)">${p.notes}</div>` : ''}
+          <div class="prospect-date">Found ${fmtDate(p.discovered_at)} · via #website-leads</div>
+        </div>
+        <div class="prospect-actions">
+          ${p.status === 'pending' ? `
+            <button class="btn-confirm" onclick="confirmProspect(${p.id}, '${p.company_name.replace(/'/g,"\\'")}')">Confirm</button>
+            <button class="btn-reject"  onclick="rejectProspect(${p.id})">Reject</button>
+          ` : `<span class="prospect-status-tag status-${p.status}">${p.status}</span>`}
+        </div>
+      </div>`).join('')}`;
+
+  document.getElementById('prospectsWrap').innerHTML = html;
+}
+
+async function confirmProspect(id, companyName) {
+  // 1. Mark as confirmed in partner_prospects
+  await fetch(`${SUPABASE_URL}/rest/v1/partner_prospects?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json', Prefer: 'return=minimal'
+    },
+    body: JSON.stringify({ status: 'confirmed', confirmed_at: new Date().toISOString() })
+  });
+
+  // 2. Add to partners table as unenriched
+  await fetch(`${SUPABASE_URL}/rest/v1/partners`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json', Prefer: 'return=minimal'
+    },
+    body: JSON.stringify({ partner_name: companyName, tier: null, activation: 'Investigate' })
+  });
+
+  // 3. Log to audit
+  await fetch(`${SUPABASE_URL}/rest/v1/partner_audit_log`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json', Prefer: 'return=minimal'
+    },
+    body: JSON.stringify({
+      partner_name: companyName, source: 'manual',
+      changes: JSON.stringify([{ field: 'status', old_value: 'prospect', new_value: 'partner' }]),
+      summary: `Confirmed from #website-leads prospect — added to partners for enrichment`,
+      triggered_by: 'shruti:dashboard'
+    })
+  });
+
+  // Reload partners data + prospects
+  loadFromSupabase();
+  loadProspects();
+  checkProspectsBadge();
+}
+
+async function rejectProspect(id) {
+  await fetch(`${SUPABASE_URL}/rest/v1/partner_prospects?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json', Prefer: 'return=minimal'
+    },
+    body: JSON.stringify({ status: 'rejected', rejected_at: new Date().toISOString() })
+  });
+  loadProspects();
+  checkProspectsBadge();
 }
 
 // ── FEED ──────────────────────────────────────────────────────────────────
@@ -1185,116 +1619,137 @@ function generateFeedItems(partners) {
     const pipeline = Number(p.pipeline_value || 0);
     const deals    = parseDeals(p.pipeline_deals);
     const rg       = regionGroup(p.region);
+    const customers = (() => { try { return JSON.parse(p.customers || '[]'); } catch(e) { return []; } })();
+    const hasCustomers = Array.isArray(customers) && customers.length > 0;
+    const hasDecks = p.signature_capability || p.market_position;
 
-    // ── URGENT: hot deals close to closing ──
+    // ── URGENT: T1 with hot deal — build enablement to unblock it ──
     deals.forEach(d => {
-      const stage = (d.stage || '').toLowerCase().replace(/_/g,' ');
-      const hotStages = ['negotiation','contract sent','contract signed','contract_sent','contract_signed'];
-      if (hotStages.some(s => (d.stage||'').toLowerCase().includes(s.replace(' ','_')) || (d.stage||'').toLowerCase() === s)) {
+      const stage = (d.stage || '').toLowerCase();
+      const hotStages = ['negotiation','contract_sent','contract sent','proposal_pending'];
+      if (hotStages.some(s => stage.includes(s.replace(' ','_')) || stage === s)) {
+        const custName = d.end_customer || d.deal_name || 'deal';
         items.push({
           priority: 1, label: 'urgent',
-          title: `Close ${d.end_customer || d.deal_name || 'deal'} with ${p.partner_name}`,
-          context: `${fmtUSD(Number(d.value||0))} · ${stage}`,
-          partner: p.partner_name, tier: p.tier, region: rg
+          title: `Build ${custName} pitch deck for ${p.partner_name}`,
+          context: `${fmtUSD(Number(d.value||0))} deal at ${stage.replace(/_/g,' ')} — partner needs tailored materials to close`,
+          partner: p.partner_name, tier: p.tier, region: rg,
+          action: 'Create enablement'
         });
       }
     });
 
-    // ── URGENT: proposal_pending deals with value ──
-    deals.forEach(d => {
-      if ((d.stage||'').toLowerCase() === 'proposal_pending' && Number(d.value||0) > 20000) {
-        items.push({
-          priority: 1, label: 'urgent',
-          title: `Follow up on ${d.end_customer || d.deal_name} proposal — ${p.partner_name}`,
-          context: `${fmtUSD(Number(d.value||0))} · proposal pending`,
-          partner: p.partner_name, tier: p.tier, region: rg
-        });
-      }
-    });
-
-    // ── HIGH: T1 with large stuck pipeline ──
-    if (isT1) {
-      deals.forEach(d => {
-        const stage = (d.stage||'').toLowerCase();
-        const earlyStages = ['discovery','qualified','contact_made'];
-        if (earlyStages.includes(stage) && Number(d.value||0) >= 50000) {
-          items.push({
-            priority: 2, label: 'high',
-            title: `Move ${d.end_customer || d.deal_name} out of ${stage.replace('_',' ')} — ${p.partner_name}`,
-            context: `${fmtUSD(Number(d.value||0))} stalled in ${stage.replace('_',' ')}`,
-            partner: p.partner_name, tier: p.tier, region: rg
-          });
-        }
+    // ── URGENT: T1 with no profile — can't build any materials ──
+    if (isT1 && !isEnriched(p)) {
+      items.push({
+        priority: 1, label: 'urgent',
+        title: `Run kundali for ${p.partner_name} — T1 missing full profile`,
+        context: 'Cannot build targeted enablement or plan co-marketing without enriched partner data',
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Enrich partner'
       });
     }
 
-    // ── HIGH: T1 with zero pipeline ──
-    if (isT1 && pipeline === 0) {
+    // ── HIGH: T1 with customers but no case study ──
+    if (isT1 && hasCustomers && (!p.proof_status || p.proof_status === 'none')) {
+      const custList = customers.slice(0,2).map(c => c.name || c).filter(Boolean).join(', ');
       items.push({
         priority: 2, label: 'high',
-        title: `Build pipeline with ${p.partner_name} — T1 with no open deals`,
-        context: revenue > 0 ? `Has ${fmtUSD(revenue)} revenue but no active pipeline` : 'No revenue or pipeline',
-        partner: p.partner_name, tier: p.tier, region: rg
+        title: `Write case study for ${p.partner_name}`,
+        context: `Deployed customers (${custList || 'on record'}) — strong proof point ready to be documented`,
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Create case study'
       });
     }
 
-    // ── HIGH: T1/T2 not enriched ──
-    if ((isT1 || isT2) && !isEnriched(p)) {
-      items.push({
-        priority: 2, label: 'high',
-        title: `Enrich ${p.partner_name} — ${p.tier} partner missing profile data`,
-        context: 'No activation stage, verticals, or contact data',
-        partner: p.partner_name, tier: p.tier, region: rg
-      });
-    }
-
-    // ── MEDIUM: case study in progress ──
+    // ── HIGH: case study in progress — needs finishing ──
     if (p.proof_status === 'in_progress') {
       items.push({
-        priority: 3, label: 'medium',
-        title: `Complete case study for ${p.partner_name}`,
-        context: 'Proof status marked in progress — needs finalising',
-        partner: p.partner_name, tier: p.tier, region: rg
+        priority: 2, label: 'high',
+        title: `Finish case study for ${p.partner_name}`,
+        context: 'Proof status marked in progress — finalise and publish',
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Complete case study'
       });
     }
 
-    // ── MEDIUM: T1/T2 with co-marketing needed ──
-    if ((isT1 || isT2) && (p.needs_co_marketing || '').toLowerCase() === 'yes') {
+    // ── HIGH: T1 with large pipeline but no vertical deck ──
+    if (isT1 && pipeline >= 30000 && !hasDecks) {
+      const vertical = p.primary_verticals || 'target vertical';
+      items.push({
+        priority: 2, label: 'high',
+        title: `Build ${vertical} market-entry deck for ${p.partner_name}`,
+        context: `${fmtUSD(pipeline)} pipeline with no vertical collateral — partner selling without tailored materials`,
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Create deck'
+      });
+    }
+
+    // ── HIGH: co-marketing needed on T1 ──
+    if (isT1 && (p.needs_co_marketing || '').toLowerCase() === 'yes') {
+      items.push({
+        priority: 2, label: 'high',
+        title: `Plan co-marketing with ${p.partner_name}`,
+        context: `T1 partner flagged for co-marketing — identify joint event or campaign opportunity in ${p.region || 'their region'}`,
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Plan co-marketing'
+      });
+    }
+
+    // ── MEDIUM: T2 with pipeline — support to accelerate ──
+    if (isT2 && pipeline >= 20000) {
+      const bigDeal = deals.filter(d => Number(d.value||0) >= 20000)[0];
+      const dealCtx = bigDeal ? `${bigDeal.end_customer || bigDeal.deal_name} (${fmtUSD(Number(bigDeal.value||0))})` : `${fmtUSD(pipeline)} in pipeline`;
       items.push({
         priority: 3, label: 'medium',
-        title: `Plan co-marketing activation with ${p.partner_name}`,
-        context: `${p.tier} · ${p.region} · co-marketing flagged needed`,
-        partner: p.partner_name, tier: p.tier, region: rg
+        title: `Send enablement pack to ${p.partner_name}`,
+        context: `Active deal: ${dealCtx} — share relevant vertical guides and pitch materials`,
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Send materials'
       });
     }
 
-    // ── MEDIUM: T2 with pipeline but no revenue ──
-    if (isT2 && pipeline > 0 && revenue === 0) {
+    // ── MEDIUM: T1/T2 co-marketing needed ──
+    if (isT2 && (p.needs_co_marketing || '').toLowerCase() === 'yes') {
       items.push({
         priority: 3, label: 'medium',
-        title: `Convert pipeline to revenue — ${p.partner_name}`,
-        context: `${fmtUSD(pipeline)} in pipeline, $0 revenue closed`,
-        partner: p.partner_name, tier: p.tier, region: rg
+        title: `Explore co-marketing with ${p.partner_name}`,
+        context: `T2 partner flagged for co-marketing in ${p.region || 'their region'}`,
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Plan co-marketing'
       });
     }
 
-    // ── LOW: T2 with no pipeline and no revenue ──
-    if (isT2 && pipeline === 0 && revenue === 0) {
+    // ── MEDIUM: T2 not enriched ──
+    if (isT2 && !isEnriched(p)) {
+      items.push({
+        priority: 3, label: 'medium',
+        title: `Run kundali for ${p.partner_name}`,
+        context: 'T2 partner missing profile data — needed before planning any activation',
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Enrich partner'
+      });
+    }
+
+    // ── LOW: T1 with no pipeline — build awareness materials ──
+    if (isT1 && pipeline === 0 && revenue > 0) {
       items.push({
         priority: 4, label: 'low',
-        title: `Nurture ${p.partner_name} — T2 with no deals`,
-        context: 'No revenue or pipeline in system',
-        partner: p.partner_name, tier: p.tier, region: rg
+        title: `Refresh market-entry materials for ${p.partner_name}`,
+        context: `T1 with ${fmtUSD(revenue)} revenue but no active pipeline — consider new vertical guide or event presence`,
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Review materials'
       });
     }
 
-    // ── LOW: T3 with large pipeline (watch) ──
+    // ── LOW: T3 with notable pipeline — worth watching ──
     if (!isT1 && !isT2 && pipeline >= 50000) {
       items.push({
         priority: 4, label: 'low',
-        title: `Watch ${p.partner_name} — T3 with significant pipeline`,
-        context: `${fmtUSD(pipeline)} pipeline · consider upgrading to T2`,
-        partner: p.partner_name, tier: p.tier, region: rg
+        title: `Monitor ${p.partner_name} — may be ready for T2 support`,
+        context: `${fmtUSD(pipeline)} pipeline as T3 — share basic collateral and reassess tier`,
+        partner: p.partner_name, tier: p.tier, region: rg,
+        action: 'Review tier'
       });
     }
   });
@@ -1309,18 +1764,55 @@ function renderFeed() {
     return;
   }
 
-  const regionF = (document.getElementById('feedRegionFilter')||{}).value || 'All';
-  const tierF   = (document.getElementById('feedTierFilter')||{}).value   || 'All';
+  const allItems = generateAIFeedItems(ALL_PARTNERS);
+  LAST_FEED_ITEMS = allItems;
 
-  let partners = ALL_PARTNERS;
-  if (regionF !== 'All') partners = partners.filter(p => regionGroup(p.region) === regionF);
-  if (tierF   !== 'All') partners = partners.filter(p => (p.tier||'').toUpperCase().startsWith(tierF));
+  // Update category counts
+  const countAll = allItems.length;
+  document.getElementById('fc-ALL').textContent = countAll;
+  FEED_CATS.forEach(cat => {
+    const el = document.getElementById(`fc-${cat}`);
+    if (el) el.textContent = allItems.filter(i => i.cat === cat).length;
+  });
 
-  const items = generateFeedItems(partners);
+  renderFeedItems(allItems);
+}
 
-  if (!items.length) {
-    document.getElementById('feedItems').innerHTML =
-      '<div class="feed-empty">No action items — everything looks good!</div>';
+// Feed item status — persisted in localStorage
+const FEED_STATUS_KEY = 'flytbase_feed_status_v2';
+function loadFeedStatus() {
+  try { return JSON.parse(localStorage.getItem(FEED_STATUS_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveFeedStatus(s) {
+  try { localStorage.setItem(FEED_STATUS_KEY, JSON.stringify(s)); } catch(e) {}
+}
+function feedItemId(item) {
+  return `${item.partner}::${item.cat}::${(item.title||'').slice(0,60)}`;
+}
+function setFeedItemStatus(itemId, status) {
+  const s = loadFeedStatus();
+  if (status === 'open') delete s[itemId]; else s[itemId] = status;
+  saveFeedStatus(s);
+  renderFeedItems(LAST_FEED_ITEMS);
+}
+let SHOW_DONE = false;
+
+function renderFeedItems(allItems) {
+  const items = ACTIVE_FEED_CAT === 'ALL' ? allItems : allItems.filter(i => i.cat === ACTIVE_FEED_CAT);
+  const statusMap = loadFeedStatus();
+
+  // Separate done from active
+  const activeItems = items.filter(i => statusMap[feedItemId(i)] !== 'done');
+  const doneItems   = items.filter(i => statusMap[feedItemId(i)] === 'done');
+
+  const doneToggle = doneItems.length > 0
+    ? `<div style="padding:10px 0 4px;cursor:pointer;font-size:12px;color:var(--secondary);display:flex;align-items:center;gap:6px;" onclick="SHOW_DONE=!SHOW_DONE;renderFeedItems(LAST_FEED_ITEMS);">
+        <span style="font-family:'Geist Mono',monospace;font-size:10px;background:var(--tag-bg);padding:2px 7px;">${doneItems.length} DONE</span>
+        <span>${SHOW_DONE ? '▲ hide' : '▼ show'}</span>
+      </div>` : '';
+
+  if (!activeItems.length && !doneItems.length) {
+    document.getElementById('feedItems').innerHTML = '<div class="feed-empty">No items in this category.</div>';
     return;
   }
 
@@ -1331,35 +1823,271 @@ function renderFeed() {
     { key: 'low',    label: 'Low',    cls: 'p-low',    dotCls: 'dot-low'    },
   ];
 
+  function renderItem(item, isDone) {
+    const id = feedItemId(item);
+    const st = statusMap[id] || 'open';
+    const g = groups.find(g => g.key === (item.label||'').toLowerCase()) || groups[3];
+    const opacity = isDone ? 'opacity:0.45;' : '';
+    return `
+      <div class="feed-item" id="fi-${btoa(unescape(encodeURIComponent(id))).slice(0,16)}" style="${opacity}">
+        <div class="feed-dot ${g.dotCls}"></div>
+        <div class="feed-item-body" style="flex:1;min-width:0;">
+          <div class="feed-item-title" style="${isDone?'text-decoration:line-through;color:var(--secondary);':''}">${esc(item.title||'')}</div>
+          <div class="feed-item-meta" style="margin-top:3px;">
+            <span class="feed-item-context">${esc(item.context||'')}</span>
+          </div>
+          ${item.reason ? `<div style="margin-top:5px;padding:4px 8px;background:var(--bg);border-left:2px solid var(--border);font-size:11px;font-family:'Geist Mono',monospace;color:var(--secondary);line-height:1.5;">${esc(item.reason)}</div>` : ''}
+        </div>
+        <div class="feed-item-right" style="flex-shrink:0;display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+          ${item.tier ? `<span class="card-tier ${tierBadge(item.tier)}" style="font-size:9px;padding:2px 6px">${tierLabel(item.tier)}</span>` : ''}
+          <span class="feed-region-tag">${esc(item.region||'')}</span>
+          <span style="font-family:'Geist Mono',monospace;font-size:9px;background:var(--tag-bg);padding:2px 7px;color:var(--secondary);font-weight:600;letter-spacing:0.06em">${esc(item.cat||'')}</span>
+          <div style="display:flex;gap:4px;margin-top:4px;width:100%;justify-content:flex-end;">
+            ${isDone
+              ? `<button onclick="setFeedItemStatus(${JSON.stringify(id)},'open')" style="font-size:10px;padding:2px 8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'Geist Mono',monospace;color:var(--secondary);">↩ Reopen</button>`
+              : `<button onclick="setFeedItemStatus(${JSON.stringify(id)},'on_it')" style="font-size:10px;padding:2px 8px;border:1px solid ${st==='on_it'?'var(--orange)':'var(--border)'};background:${st==='on_it'?'var(--orange-light)':'var(--surface)'};cursor:pointer;font-family:'Geist Mono',monospace;color:${st==='on_it'?'var(--orange)':'var(--secondary)'};">${st==='on_it'?'★ On it':'☆ On it'}</button>
+                 <button onclick="setFeedItemStatus(${JSON.stringify(id)},'skip')"  style="font-size:10px;padding:2px 8px;border:1px solid ${st==='skip'?'#999':'var(--border)'};background:${st==='skip'?'var(--tag-bg)':'var(--surface)'};cursor:pointer;font-family:'Geist Mono',monospace;color:var(--secondary);">Skip</button>
+                 <button onclick="setFeedItemStatus(${JSON.stringify(id)},'done')"  style="font-size:10px;padding:2px 8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'Geist Mono',monospace;color:var(--secondary);">✓ Done</button>`
+            }
+          </div>
+        </div>
+      </div>`;
+  }
+
   let html = '';
   groups.forEach(g => {
-    const grpItems = items.filter(i => i.label === g.key);
+    const grpItems = activeItems.filter(i => (i.label||'').toLowerCase() === g.key);
     if (!grpItems.length) return;
+    // Sort: "on_it" first within group
+    grpItems.sort((a,b) => {
+      const sa = statusMap[feedItemId(a)] === 'on_it' ? 0 : 1;
+      const sb = statusMap[feedItemId(b)] === 'on_it' ? 0 : 1;
+      return sa - sb || a.partner.localeCompare(b.partner);
+    });
+    const onItCount = grpItems.filter(i => statusMap[feedItemId(i)] === 'on_it').length;
+    const skipCount = grpItems.filter(i => statusMap[feedItemId(i)] === 'skip').length;
+    const statusNote = [
+      onItCount > 0 ? `${onItCount} in progress` : '',
+      skipCount > 0 ? `${skipCount} skipped` : ''
+    ].filter(Boolean).join(' · ');
     html += `
       <div class="feed-section">
-        <div class="feed-section-label ${g.cls}">
-          ${g.label.toUpperCase()}
-          <span class="count">${grpItems.length}</span>
+        <div class="feed-section-label ${g.cls}" style="display:flex;align-items:center;gap:8px;">
+          ${g.label.toUpperCase()} <span class="count">${grpItems.length}</span>
+          ${statusNote ? `<span style="font-size:10px;font-weight:400;color:var(--secondary);margin-left:4px;">${statusNote}</span>` : ''}
         </div>
-        ${grpItems.map(item => `
-          <div class="feed-item">
-            <div class="feed-dot ${g.dotCls}"></div>
-            <div class="feed-item-body">
-              <div class="feed-item-title">${item.title}</div>
-              <div class="feed-item-meta">
-                <span class="feed-item-context">${item.context}</span>
-              </div>
-            </div>
-            <div class="feed-item-right">
-              ${item.tier ? `<span class="card-tier ${tierBadge(item.tier)}" style="font-size:9px;padding:2px 6px">${tierLabel(item.tier)}</span>` : ''}
-              <span class="feed-region-tag">${item.region}</span>
-            </div>
-          </div>`).join('')}
+        ${grpItems.map(item => renderItem(item, false)).join('')}
       </div>`;
   });
 
+  if (doneItems.length) {
+    html += doneToggle;
+    if (SHOW_DONE) {
+      html += `<div class="feed-section">${doneItems.map(i => renderItem(i, true)).join('')}</div>`;
+    }
+  } else {
+    html += doneToggle;
+  }
+
   document.getElementById('feedItems').innerHTML = html;
 }
+
+// Feed categories — exactly these 5
+const FEED_CATS = ['UNBLOCK DEAL','ACTIVATE STORY','ENABLEMENT GAP','RE-ENGAGE'];
+let ACTIVE_FEED_CAT = 'ALL';
+
+function setFeedCat(cat) {
+  ACTIVE_FEED_CAT = cat;
+  document.querySelectorAll('.feed-cat').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  renderFeedItems(LAST_FEED_ITEMS);
+}
+
+let LAST_FEED_ITEMS = [];
+
+function generateAIFeedItems(partners) {
+  const items = [];
+
+  const relevant = partners.filter(p => ['T1','T2','T3'].includes((p.tier||'').toUpperCase()));
+
+  relevant.forEach(p => {
+    const isT1  = (p.tier||'').toUpperCase() === 'T1';
+    const notes = (p.notes||'').toLowerCase();
+    const rawNotes = p.notes || '';
+    const pipeline = Number(p.pipeline_value||0);
+    const revenue  = Number(p.revenue||0);
+    const rg   = regionGroup(p.region);
+    const freq = (p.comm_frequency||'').toLowerCase();
+
+    let customers = [];
+    try { customers = Array.isArray(p.customers) ? p.customers : JSON.parse(p.customers||'[]'); } catch(e){}
+    const custNames = customers.map(c => typeof c==='string' ? c : (c.name||'')).filter(Boolean);
+    const hasCustomers = custNames.length > 0;
+
+    let deals = [];
+    try { deals = Array.isArray(p.pipeline_deals) ? p.pipeline_deals : JSON.parse(p.pipeline_deals||'[]'); } catch(e){}
+
+    // ── SIGNAL DETECTION ──────────────────────────────────────────────────
+
+    // UNBLOCK DEAL: only signals where MARKETING can intervene
+    const riskKeywords = [
+      'tender','rfp','competitor','competing','comparing','flighthub','flight hub',
+      'vs flighthub','alternative platform','evaluating platforms'
+    ];
+    // Also check for explicit [SIGNAL: UNBLOCK DEAL] tag written by scheduled task
+    const explicitUnblock = rawNotes.match(/\[SIGNAL:\s*UNBLOCK DEAL\s*[-–]\s*([^\]]{5,120})\]/i);
+    // Exclude closed_lost context — keyword must not appear only inside [CLOSED_LOST] blocks
+    const notesWithoutClosed = rawNotes.replace(/\[CLOSED_LOST\][^\n.]{0,200}/gi, '').toLowerCase();
+    // Also require there to be some active pipeline or deal to unblock
+    const hasActiveDeal = pipeline > 0 || deals.some(d => Number(d.value||0) > 0);
+    const riskMatch = (hasActiveDeal && riskKeywords.find(k => notesWithoutClosed.includes(k))) || (explicitUnblock ? 'signal' : null);
+    // Extract surrounding context for the matched keyword
+    function snippetAround(raw, keyword) {
+      const idx = raw.toLowerCase().indexOf(keyword.toLowerCase());
+      if (idx < 0) return keyword;
+      const start = Math.max(0, idx - 30);
+      const end   = Math.min(raw.length, idx + keyword.length + 60);
+      let s = raw.slice(start, end).trim();
+      if (start > 0) s = '…' + s;
+      if (end < raw.length) s = s + '…';
+      return s;
+    }
+
+    // ACTIVATE STORY: customers with growth/expansion signals OR continuous revenue
+    const expansionKeywords = [
+      'scaling','adding docks','more docks','upgrade','expanding','additional sites',
+      'new site','renewal','renewed','second deployment','growing','more licenses',
+      'follow-on','asking for more'
+    ];
+    const hasExpansion = expansionKeywords.some(k => notes.includes(k));
+    const storyReady = hasCustomers && (revenue > 0 || hasExpansion) && p.proof_status !== 'verified';
+    const storyInProgress = p.proof_status === 'in_progress';
+
+    // ENABLEMENT GAP: partner explicitly asked for a specific marketing material
+    // Catches: explicit [SIGNAL] lines written by scheduled task, OR keyword patterns in notes
+    const askPatterns = [
+      /\[SIGNAL:\s*ENABLEMENT GAP\s*[-–]\s*([^\]]{5,120})\]/i,  // explicit signal tag
+      /(?:asked for|requested)\s([^.]{5,80}(?:deck|guide|video|case study|collateral|one.pager|materials|locali|dutch|brochure|whitepaper|playbook|positioning)[^.]{0,40})/i,
+      /(?:no|missing)\s(?:materials?|collateral|deck|guide)\s(?:for\s)?([^.]{5,60})/i,
+      /(?:needs?|wants?)\s(?:FlytBase\s)?(?:positioning|co-marketing|marketing support|vertical guide|case study|proof)[^.]{0,60}/i,
+    ];
+    let noteSignal = null;
+    for (const rx of askPatterns) {
+      const m = rawNotes.match(rx);
+      if (m) { noteSignal = (m[1] || m[0]).trim().slice(0, 100); break; }
+    }
+
+    // RE-ENGAGE: pipeline exists but comms have gone quiet
+    const isQuiet = !['weekly','monthly'].includes(freq);
+    const hasRePipeline = pipeline > 0;
+
+    // ── 1 · UNBLOCK DEAL (urgent) ─────────────────────────────────────────
+    if (riskMatch) {
+      // Find the most relevant deal: prefer one whose name/customer also contains a risk keyword,
+      // then fall back to highest-value deal, then any named deal
+      const keywordDeals = deals.filter(d => {
+        const dtext = ((d.name||'') + ' ' + (d.deal_name||'') + ' ' + (d.end_customer||'')).toLowerCase();
+        return riskKeywords.some(k => dtext.includes(k));
+      });
+      const valuedDeals = deals.filter(d => Number(d.value||0) > 0)
+        .sort((a,b) => Number(b.value||0) - Number(a.value||0));
+      const namedDeals = deals.filter(d => (d.end_customer || d.name || d.deal_name) && (d.end_customer || d.name || d.deal_name).toLowerCase() !== 'navigate' && (d.end_customer || d.name || d.deal_name).toLowerCase() !== p.partner_name.toLowerCase());
+
+      const hotDeal = (keywordDeals.length ? keywordDeals.sort((a,b) => Number(b.value||0) - Number(a.value||0))[0]
+        : valuedDeals[0]) || namedDeals[0];
+
+      const custName = hotDeal ? (hotDeal.end_customer || hotDeal.name || hotDeal.deal_name || '').replace(/_/g,' ') : null;
+      const dealVal  = hotDeal ? Number(hotDeal.value||0) : 0;
+      const dealCtx  = custName
+        ? (dealVal > 0 ? `${custName} · ${fmtUSD(dealVal)}` : custName)
+        : (pipeline > 0 ? `${fmtUSD(pipeline)} pipeline` : 'active deal');
+
+      const signalText = explicitUnblock ? explicitUnblock[1].toLowerCase() : '';
+      const isTender = ['tender','rfp'].includes(riskMatch) || signalText.includes('tender') || signalText.includes('rfp');
+      const action = isTender
+        ? 'Send proof pack and vertical case study before submission deadline'
+        : 'Send competitive positioning and customer references — rival platform in the room';
+      items.push({
+        priority: 1, label: 'urgent', cat: 'UNBLOCK DEAL',
+        title: `${p.partner_name} — ${riskMatch.toUpperCase()} · ${dealCtx}`,
+        context: action,
+        reason: explicitUnblock
+          ? explicitUnblock[1].trim()
+          : `Signal in notes: "${snippetAround(rawNotes.replace(/\[CLOSED_LOST\][^\n.]{0,200}/gi,''), riskMatch)}"`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── 2 · ACTIVATE STORY (high) ─────────────────────────────────────────
+    if (storyReady && !storyInProgress) {
+      const growth = hasExpansion ? 'customer expanding' : `${fmtUSD(revenue)} continuous revenue`;
+      const expansionWord = expansionKeywords.find(k => notes.includes(k));
+      items.push({
+        priority: 2, label: 'high', cat: 'ACTIVATE STORY',
+        title: `Capture story: ${p.partner_name} × ${custNames[0]}`,
+        context: `${growth} — story is live and getting better, brief now before the moment passes`,
+        reason: expansionWord
+          ? `Expansion signal in notes: "${snippetAround(rawNotes, expansionWord)}"`
+          : `${fmtUSD(revenue)} revenue + ${custNames.length} deployed customer${custNames.length>1?'s':''}: ${custNames.slice(0,2).join(', ')}`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+    if (storyInProgress) {
+      items.push({
+        priority: 2, label: 'high', cat: 'ACTIVATE STORY',
+        title: `Push case study to completion — ${p.partner_name}`,
+        context: hasCustomers
+          ? `Interview ${custNames[0]} and write it up — ${custNames.length > 1 ? custNames.length + ' customers live' : 'customer live'}, story not yet published`
+          : 'Story marked in progress — identify the featured customer and draft',
+        reason: `${revenue > 0 ? fmtUSD(revenue) + ' revenue · ' : ''}customers: ${custNames.slice(0,3).join(', ') || 'see partner profile'}`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── 3 · ENABLEMENT GAP (high) ─────────────────────────────────────────
+    if (noteSignal) {
+      items.push({
+        priority: 2, label: 'high', cat: 'ENABLEMENT GAP',
+        title: `${p.partner_name} asked: "${noteSignal}"`,
+        context: 'Direct signal from call notes — build or send what they asked for',
+        reason: `Matched pattern in notes: "${noteSignal}"`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+    // T1 with incomplete profile — can't build materials without data
+    if (isT1 && !isEnriched(p)) {
+      items.push({
+        priority: 1, label: 'urgent', cat: 'ENABLEMENT GAP',
+        title: `Run kundali for ${p.partner_name} — T1 profile incomplete`,
+        context: 'Cannot build targeted materials or plan activations without enriched data',
+        reason: `T1 partner · missing: ${[!p.signature_capability && 'signature capability', !p.star_story && 'star story', !p.primary_verticals && 'verticals'].filter(Boolean).join(', ') || 'core profile fields'}`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+
+    // ── 4 · RE-ENGAGE (medium) ────────────────────────────────────────────
+    // Pipeline exists but comms have gone quiet — something is cooking, go offer support
+    if (!isT1 && hasRePipeline && isQuiet) {
+      const bigDeal = deals
+        .filter(d => Number(d.value||0) > 0)
+        .sort((a,b) => Number(b.value||0) - Number(a.value||0))[0];
+      const dealCtx = bigDeal
+        ? `${bigDeal.end_customer || bigDeal.deal_name || bigDeal.name || 'deal'} · ${fmtUSD(Number(bigDeal.value||0))}`
+        : fmtUSD(pipeline);
+      const freqLabel = freq || 'no recent contact';
+      items.push({
+        priority: 3, label: 'medium', cat: 'RE-ENGAGE',
+        title: `${p.partner_name} has ${fmtUSD(pipeline)} pipeline — reach out`,
+        context: `${dealCtx} · ${freqLabel} comms — offer market-entry materials and event presence`,
+        reason: `pipeline_value = ${fmtUSD(pipeline)} · comm_frequency = "${freq || 'unknown'}" · tier = ${p.tier}`,
+        partner: p.partner_name, tier: p.tier, region: rg
+      });
+    }
+  });
+
+  return items.sort((a, b) => a.priority - b.priority || a.partner.localeCompare(b.partner));
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── AUDIT LOG ─────────────────────────────────────────────────────────────
 async function loadAuditLog() {
@@ -1456,6 +2184,7 @@ function renderAuditLog(rows) {
 
 // ── AUTO-LOAD ─────────────────────────────────────────────────────────────
 loadFromSupabase();
+checkProspectsBadge();
 </script>
 </body>
 </html>
